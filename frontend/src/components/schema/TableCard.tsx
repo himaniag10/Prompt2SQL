@@ -24,19 +24,20 @@ export const TableCard: React.FC<TableCardProps> = ({ table, isSelected, onClick
     <motion.div
       layout
       className={clsx(
-        "bg-white border rounded-2xl p-5 transition-all flex-1 min-w-[260px] max-w-[320px] shadow-sm flex flex-col gap-4 relative overflow-hidden",
+        "bg-surface border rounded-2xl p-6 transition-all duration-200 flex-1 min-w-[280px] max-w-[340px] shadow-sm hover:shadow-md hover:-translate-y-0.5 flex flex-col gap-5 relative overflow-hidden cursor-pointer",
         isSelected 
-          ? "border-[#591C26]/40 shadow-md ring-1 ring-[#591C26]/20 bg-[#591C26]/5" 
-          : "border-border/80 hover:border-border hover:shadow-md"
+          ? "border-primary/40 ring-1 ring-primary/20 bg-primary/5 shadow-md" 
+          : "border-border hover:border-primary/30"
       )}
+      onClick={onClick}
     >
-      {isSelected && <div className="absolute top-0 left-0 right-0 h-1 bg-[#591C26]" />}
+      {isSelected && <div className="absolute top-0 left-0 right-0 h-1 bg-primary" />}
       
       {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#591C26]/10 flex items-center justify-center shrink-0">
-            <TableProperties className="w-5 h-5 text-[#591C26]" />
+          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <TableProperties className="w-6 h-6 text-primary" />
           </div>
           <div>
             <h3 className="font-bold text-text text-base truncate max-w-[150px]">{table.name}</h3>
@@ -84,7 +85,7 @@ export const TableCard: React.FC<TableCardProps> = ({ table, isSelected, onClick
           onClick={(e) => { e.stopPropagation(); onClick(); }}
           className={clsx(
             "flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors",
-            isSelected ? "bg-[#591C26]/10 text-[#591C26]" : "bg-surface text-muted hover:bg-border/50"
+            isSelected ? "bg-primary/10 text-primary" : "bg-surface text-muted hover:bg-border/50"
           )}
         >
           {isSelected ? (

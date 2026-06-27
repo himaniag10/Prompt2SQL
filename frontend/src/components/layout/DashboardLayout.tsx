@@ -24,7 +24,7 @@ export const DashboardLayout: React.FC = () => {
   const [notifications, setNotifications] = useState([
     { id: 1, title: 'Schema migrated successfully', time: '2 hours ago', icon: 'database', color: 'bg-blue-500/10' },
     { id: 2, title: 'Team member joined project', time: '5 hours ago', icon: 'user', color: 'bg-emerald-500/10' },
-    { id: 3, title: 'System update completed', time: '1 day ago', icon: 'settings', color: 'bg-[#591C26]/10' }
+    { id: 3, title: 'System update completed', time: '1 day ago', icon: 'settings', color: 'bg-primary/10' }
   ]);
   
   const { projectId } = useParams<{ projectId?: string }>();
@@ -93,7 +93,7 @@ export const DashboardLayout: React.FC = () => {
         {/* Sidebar Header / Logo */}
         <div className="h-14 flex items-center px-4 border-b border-border shrink-0">
           <div className="flex items-center gap-2 min-w-max">
-            <div className="w-8 h-8 rounded-[6px] bg-[#591C26] text-white flex items-center justify-center shadow-sm shrink-0">
+            <div className="w-8 h-8 rounded-[6px] bg-primary text-white flex items-center justify-center shadow-sm shrink-0">
               <Database className="w-4 h-4" />
             </div>
             <AnimatePresence>
@@ -102,7 +102,7 @@ export const DashboardLayout: React.FC = () => {
                   initial={{ opacity: 0, width: 0 }}
                   animate={{ opacity: 1, width: 'auto' }}
                   exit={{ opacity: 0, width: 0 }}
-                  className="text-lg font-bold text-[#591C26] tracking-tight whitespace-nowrap overflow-hidden"
+                  className="text-lg font-bold text-primary tracking-tight whitespace-nowrap overflow-hidden"
                 >
                   Prompt2SQL
                 </motion.span>
@@ -119,7 +119,7 @@ export const DashboardLayout: React.FC = () => {
               <Link
                 key={item.name}
                 to={item.href}
-                className="flex items-center gap-3 p-2 rounded-lg hover:bg-border/50 text-sm font-medium text-text transition-all hover:text-[#591C26] min-w-max"
+                className="flex items-center gap-3 p-2 rounded-lg hover:bg-border/50 text-sm font-medium text-text transition-all hover:text-primary min-w-max"
                 title={!isSidebarOpen ? item.name : undefined}
               >
                 <div className="w-8 h-8 flex items-center justify-center shrink-0">
@@ -147,7 +147,7 @@ export const DashboardLayout: React.FC = () => {
           {/* Theme Toggle */}
           <button 
             onClick={() => setIsDarkMode(!isDarkMode)}
-            className="flex items-center gap-3 p-2 rounded-lg hover:bg-border/50 text-sm font-medium text-text transition-all hover:text-[#591C26] min-w-max w-full"
+            className="flex items-center gap-3 p-2 rounded-lg hover:bg-border/50 text-sm font-medium text-text transition-all hover:text-primary min-w-max w-full"
             title={!isSidebarOpen ? "Toggle Theme" : undefined}
           >
             <div className="w-8 h-8 flex items-center justify-center shrink-0">
@@ -170,7 +170,7 @@ export const DashboardLayout: React.FC = () => {
           {/* User Profile */}
           <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-border/50 text-sm font-medium text-text transition-all min-w-max w-full cursor-pointer">
             <div className="w-8 h-8 flex items-center justify-center shrink-0">
-              <div className="w-7 h-7 rounded-full bg-[#591C26] flex items-center justify-center text-white font-bold text-xs shadow-sm">
+              <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-white font-bold text-xs shadow-sm">
                 {user?.name?.charAt(0).toUpperCase() || 'U'}
               </div>
             </div>
@@ -217,7 +217,7 @@ export const DashboardLayout: React.FC = () => {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 bg-background relative overflow-hidden">
         {/* Top Header - Kept slim for breadcrumbs & notifications */}
-        <header className="h-14 border-b border-border bg-white flex items-center justify-between px-4 shrink-0 z-30 shadow-sm">
+        <header className="h-14 border-b border-border bg-surface flex items-center justify-between px-4 shrink-0 z-30 shadow-sm">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setSidebarOpen(!isSidebarOpen)}
@@ -226,7 +226,7 @@ export const DashboardLayout: React.FC = () => {
               <Menu className="w-5 h-5" />
             </button>
             
-            {/* Breadcrumbs */}
+            {/* Breadcrumbs with Dropdowns */}
             <div className="hidden md:flex items-center gap-2 text-sm ml-2">
               <ChevronRightIcon className="w-4 h-4 text-muted/40" />
               
@@ -234,7 +234,7 @@ export const DashboardLayout: React.FC = () => {
               <div className="relative" ref={projectRef}>
                 <div 
                   onClick={() => setIsProjectDropdownOpen(!isProjectDropdownOpen)}
-                  className="flex flex-col cursor-pointer group px-2 py-1 rounded hover:bg-surface transition-colors relative"
+                  className="flex flex-col cursor-pointer group px-2 py-1 rounded hover:bg-surface/80 transition-colors relative"
                 >
                   <span className="text-[10px] font-bold text-muted uppercase tracking-wider mb-[-2px]">Project</span>
                   <div className="flex items-center gap-1">
@@ -250,7 +250,7 @@ export const DashboardLayout: React.FC = () => {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 5 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute left-0 top-full mt-1 w-56 bg-white border border-border shadow-xl rounded-lg overflow-hidden z-50"
+                      className="absolute left-0 top-full mt-1 w-56 bg-surface border border-border shadow-xl rounded-lg overflow-hidden z-50"
                     >
                       <div className="max-h-64 overflow-y-auto p-1">
                         {projects?.map(p => (
@@ -260,7 +260,7 @@ export const DashboardLayout: React.FC = () => {
                               navigate(`/projects/${p.id}`);
                               setIsProjectDropdownOpen(false);
                             }}
-                            className={`px-3 py-2 text-sm rounded-md cursor-pointer flex items-center gap-2 ${activeProject?.id === p.id ? 'bg-[#591C26]/10 text-[#591C26] font-medium' : 'text-text hover:bg-surface hover:text-[#591C26]'}`}
+                            className={`px-3 py-2 text-sm rounded-md cursor-pointer flex items-center gap-2 ${activeProject?.id === p.id ? 'bg-primary/10 text-primary font-medium' : 'text-text hover:bg-surface/80 hover:text-primary'}`}
                           >
                             <Database className="w-3.5 h-3.5" />
                             <span className="truncate">{p.name}</span>
@@ -284,7 +284,7 @@ export const DashboardLayout: React.FC = () => {
                   <div className="relative" ref={schemaRef}>
                     <div 
                       onClick={() => setIsSchemaDropdownOpen(!isSchemaDropdownOpen)}
-                      className="flex flex-col cursor-pointer group px-2 py-1 rounded hover:bg-surface transition-colors relative"
+                      className="flex flex-col cursor-pointer group px-2 py-1 rounded hover:bg-surface/80 transition-colors relative"
                     >
                       <span className="text-[10px] font-bold text-muted uppercase tracking-wider mb-[-2px]">Schema</span>
                       <div className="flex items-center gap-1">
@@ -300,7 +300,7 @@ export const DashboardLayout: React.FC = () => {
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: 5 }}
                           transition={{ duration: 0.15 }}
-                          className="absolute left-0 top-full mt-1 w-56 bg-white border border-border shadow-xl rounded-lg overflow-hidden z-50"
+                          className="absolute left-0 top-full mt-1 w-56 bg-surface border border-border shadow-xl rounded-lg overflow-hidden z-50"
                         >
                           <div className="max-h-64 overflow-y-auto p-1">
                             {schemas?.map(s => (
@@ -311,7 +311,7 @@ export const DashboardLayout: React.FC = () => {
                                   setActiveSchemaId(s.id);
                                   setIsSchemaDropdownOpen(false);
                                 }}
-                                className={`px-3 py-2 text-sm rounded-md cursor-pointer flex items-center gap-2 ${activeSchema?.id === s.id ? 'bg-[#591C26]/10 text-[#591C26] font-medium' : 'text-text hover:bg-surface hover:text-[#591C26]'}`}
+                                className={`px-3 py-2 text-sm rounded-md cursor-pointer flex items-center gap-2 ${activeSchema?.id === s.id ? 'bg-primary/10 text-primary font-medium' : 'text-text hover:bg-surface/80 hover:text-primary'}`}
                               >
                                 <LayoutDashboard className="w-3.5 h-3.5" />
                                 <span className="truncate">{s.name}</span>
@@ -327,7 +327,7 @@ export const DashboardLayout: React.FC = () => {
                                   setIsSchemaDropdownOpen(false);
                                   if (!location.pathname.includes('/projects/')) navigate(`/projects/${projectId}`);
                                 }}
-                                className="px-3 py-2 text-sm rounded-md cursor-pointer flex items-center gap-2 text-[#591C26] hover:bg-[#591C26]/10 font-medium"
+                                className="px-3 py-2 text-sm rounded-md cursor-pointer flex items-center gap-2 text-primary hover:bg-primary/10 font-medium"
                               >
                                 <Database className="w-3.5 h-3.5" />
                                 <span>Create New Schema</span>
@@ -342,8 +342,8 @@ export const DashboardLayout: React.FC = () => {
               )}
             </div>
           </div>
-
-          <div className="flex items-center gap-2">
+          
+          <div className="flex items-center gap-3">
             {/* Notifications Dropdown */}
             <div className="relative" ref={notifRef}>
               <button 
@@ -365,14 +365,14 @@ export const DashboardLayout: React.FC = () => {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute right-0 top-full mt-2 w-80 bg-white border border-border shadow-xl rounded-xl overflow-hidden z-50"
+                    className="absolute right-0 top-full mt-2 w-80 bg-surface border border-border shadow-xl rounded-xl overflow-hidden z-50"
                   >
                     <div className="p-3 border-b border-border bg-surface/50 flex items-center justify-between">
                       <span className="font-bold text-sm text-text">Notifications</span>
                       {notifications.length > 0 && (
                         <span 
                           onClick={() => setNotifications([])}
-                          className="text-xs text-[#591C26] cursor-pointer hover:underline font-semibold"
+                          className="text-xs text-primary cursor-pointer hover:underline font-semibold"
                         >
                           Mark all as read
                         </span>
@@ -389,7 +389,7 @@ export const DashboardLayout: React.FC = () => {
                             <div className={`w-8 h-8 rounded-full ${notif.color} flex items-center justify-center shrink-0`}>
                               {notif.icon === 'database' && <Database className="w-4 h-4 text-blue-500" />}
                               {notif.icon === 'user' && <User className="w-4 h-4 text-emerald-500" />}
-                              {notif.icon === 'settings' && <Settings className="w-4 h-4 text-[#591C26]" />}
+                              {notif.icon === 'settings' && <Settings className="w-4 h-4 text-primary" />}
                             </div>
                             <div>
                               <p className="text-sm font-medium text-text">{notif.title}</p>
@@ -416,10 +416,10 @@ export const DashboardLayout: React.FC = () => {
               © Prompt2SQL 2026
             </div>
             <div className="flex items-center gap-6">
-              <a href="#" className="hover:text-[#591C26] transition-colors">Privacy Policy</a>
-              <a href="#" className="hover:text-[#591C26] transition-colors">Terms</a>
-              <a href="#" className="hover:text-[#591C26] transition-colors">Support</a>
-              <a href="#" className="hover:text-[#591C26] transition-colors flex items-center gap-1">
+              <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
+              <a href="#" className="hover:text-primary transition-colors">Terms</a>
+              <a href="#" className="hover:text-primary transition-colors">Support</a>
+              <a href="#" className="hover:text-primary transition-colors flex items-center gap-1">
                 GitHub Repository
               </a>
             </div>

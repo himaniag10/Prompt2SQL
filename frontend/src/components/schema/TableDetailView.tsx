@@ -49,7 +49,7 @@ export const TableDetailView: React.FC<TableDetailViewProps> = ({ table, schemaI
   });
 
   return (
-    <div className="bg-white border border-border/80 rounded-2xl shadow-sm flex flex-col overflow-hidden">
+    <div className="bg-surface border border-border/80 rounded-2xl shadow-sm flex flex-col overflow-hidden">
       {/* Header */}
       <div className="p-6 border-b border-border/50 flex items-start justify-between">
         <div>
@@ -82,11 +82,11 @@ export const TableDetailView: React.FC<TableDetailViewProps> = ({ table, schemaI
       </div>
 
       {/* Content */}
-      <div className="bg-white">
+      <div className="bg-surface">
         {activeTab === 'columns' && (
           <div className="flex flex-col">
-            <div className="p-4 flex justify-end bg-white">
-              <Button onClick={() => addColumnMutation.mutate()} className="gap-2 bg-[#591C26] hover:bg-[#4A161E] text-white">
+            <div className="p-4 flex justify-end bg-surface">
+              <Button onClick={() => addColumnMutation.mutate()} className="gap-2 bg-primary hover:bg-primary/90 text-white">
                 <Plus className="w-4 h-4" /> Add Column
               </Button>
             </div>
@@ -143,7 +143,7 @@ export const TableDetailView: React.FC<TableDetailViewProps> = ({ table, schemaI
               }}
               placeholder="Enter comprehensive table notes..."
               rows={6}
-              className="w-full bg-white border border-border rounded-xl text-sm p-4 text-text focus:border-[#591C26] focus:ring-1 focus:ring-[#591C26] outline-none transition-all resize-none shadow-sm"
+              className="w-full bg-surface border border-border rounded-xl text-sm p-4 text-text focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none shadow-sm"
             />
           </div>
         )}
@@ -157,7 +157,7 @@ const DetailTabButton = ({ active, onClick, label }: any) => (
     onClick={onClick}
     className={clsx(
       "py-3 text-sm font-semibold border-b-2 transition-colors",
-      active ? "border-[#591C26] text-[#591C26]" : "border-transparent text-muted hover:text-text hover:border-border"
+      active ? "border-primary text-primary" : "border-transparent text-muted hover:text-text hover:border-border"
     )}
   >
     {label}

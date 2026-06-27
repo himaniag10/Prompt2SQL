@@ -58,7 +58,7 @@ export const RelationshipWorkspace: React.FC<RelationshipWorkspaceProps> = ({ ve
       
       {/* Left Column: Builder */}
       <div className="w-full lg:w-1/3 space-y-6">
-        <div className="bg-white border border-border/80 p-6 rounded-2xl shadow-sm">
+        <div className="bg-surface border border-border/80 p-6 rounded-2xl shadow-sm">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-2 bg-primary/10 rounded-xl">
               <GitMerge className="w-5 h-5 text-primary" />
@@ -118,7 +118,7 @@ export const RelationshipWorkspace: React.FC<RelationshipWorkspaceProps> = ({ ve
             <button 
               type="submit" 
               disabled={createMutation.isPending}
-              className="w-full py-3 bg-[#591C26] hover:bg-[#4A161E] text-white rounded-xl text-sm font-medium transition-all shadow-md active:scale-[0.98] disabled:opacity-70 flex items-center justify-center gap-2 mt-2"
+              className="w-full py-3 bg-primary hover:bg-primary/90 text-white rounded-xl text-sm font-medium transition-all shadow-md active:scale-[0.98] disabled:opacity-70 flex items-center justify-center gap-2 mt-2"
             >
               {createMutation.isPending ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -137,7 +137,7 @@ export const RelationshipWorkspace: React.FC<RelationshipWorkspaceProps> = ({ ve
         
         {relationships.length === 0 ? (
           <EmptyState 
-            className="border border-dashed border-border/80 rounded-3xl bg-white h-full min-h-[400px]"
+            className="border border-dashed border-border/80 rounded-3xl bg-surface h-full min-h-[400px]"
             icon={<LinkIcon className="w-10 h-10 text-primary/60" />}
             title="No Relationships Created"
             description="Use the builder on the left to define foreign key constraints between your tables."
@@ -152,12 +152,12 @@ export const RelationshipWorkspace: React.FC<RelationshipWorkspaceProps> = ({ ve
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.2, delay: i * 0.05 }}
                   key={rel.id} 
-                  className="bg-white border border-border/80 p-5 rounded-2xl group hover:border-[#591C26]/40 transition-colors shadow-sm hover:shadow-md flex flex-col h-full relative overflow-hidden"
+                  className="bg-surface border border-border/80 p-5 rounded-2xl group hover:border-primary/40 transition-colors shadow-sm hover:shadow-md flex flex-col h-full relative overflow-hidden"
                 >
-                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#591C26]/5 to-[#591C26]/20" />
+                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary/5 to-primary/20" />
                   
                   <div className="flex justify-between items-start mb-6">
-                    <span className="text-xs font-bold text-[#591C26] bg-[#591C26]/10 border border-[#591C26]/20 px-3 py-1.5 rounded-full tracking-wide">
+                    <span className="text-xs font-bold text-primary bg-primary/10 border border-primary/20 px-3 py-1.5 rounded-full tracking-wide">
                       {rel.relationshipType.replace(/_/g, ' ')}
                     </span>
                     <button 
@@ -179,23 +179,23 @@ export const RelationshipWorkspace: React.FC<RelationshipWorkspaceProps> = ({ ve
                         <span className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">Source</span>
                         <span className="font-semibold text-text truncate">{getTableName(rel.sourceTableId)}</span>
                       </div>
-                      <div className="shrink-0 bg-white border border-border rounded shadow-sm px-2 py-1 text-xs text-muted font-mono">
+                      <div className="shrink-0 bg-surface border border-border rounded shadow-sm px-2 py-1 text-xs text-muted font-mono">
                         {getColumnName(rel.sourceTableId, rel.sourceColumnId)}
                       </div>
                     </div>
 
                     <div className="flex justify-center -my-1 relative z-10">
-                      <div className="w-8 h-8 rounded-full bg-white border border-border shadow-sm flex items-center justify-center text-muted">
+                      <div className="w-8 h-8 rounded-full bg-surface border border-border shadow-sm flex items-center justify-center text-muted">
                         <ArrowRight className="w-4 h-4" />
                       </div>
                     </div>
                     
-                    <div className="bg-[#591C26]/5 p-3 rounded-xl border border-[#591C26]/20 flex items-center justify-between">
+                    <div className="bg-primary/5 p-3 rounded-xl border border-primary/20 flex items-center justify-between">
                       <div className="flex flex-col truncate pr-2">
-                        <span className="text-[10px] font-bold text-[#591C26]/70 uppercase tracking-wider mb-0.5">Target</span>
-                        <span className="font-semibold text-[#591C26] truncate">{getTableName(rel.targetTableId)}</span>
+                        <span className="text-[10px] font-bold text-primary/70 uppercase tracking-wider mb-0.5">Target</span>
+                        <span className="font-semibold text-primary truncate">{getTableName(rel.targetTableId)}</span>
                       </div>
-                      <div className="shrink-0 bg-white border border-[#591C26]/20 rounded shadow-sm px-2 py-1 text-xs text-[#591C26] font-mono">
+                      <div className="shrink-0 bg-surface border border-primary/20 rounded shadow-sm px-2 py-1 text-xs text-primary font-mono">
                         {getColumnName(rel.targetTableId, rel.targetColumnId)}
                       </div>
                     </div>

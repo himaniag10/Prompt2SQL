@@ -63,7 +63,7 @@ export const SchemaBuilderPage: React.FC = () => {
         
         {/* Schema Workspace Header */}
         {activeSchema && (
-          <div className="h-14 border-b border-border/80 bg-white flex items-center justify-between px-6 z-20 shrink-0 shadow-sm sticky top-0">
+          <div className="h-14 border-b border-border/80 bg-surface flex items-center justify-between px-6 z-20 shrink-0 shadow-sm sticky top-0">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2 text-sm font-medium">
                 <span className="text-text font-bold flex items-center gap-2">
@@ -90,7 +90,7 @@ export const SchemaBuilderPage: React.FC = () => {
                <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
              </div>
           ) : !activeSchemaId ? (
-            <div className="h-full border border-dashed border-border/80 rounded-3xl bg-white flex items-center justify-center">
+            <div className="h-full border border-dashed border-border/80 rounded-3xl bg-surface flex items-center justify-center">
               <div className="flex flex-col items-center justify-center text-center p-8 max-w-sm">
                 <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
                   <DatabaseZap className="w-8 h-8 text-primary/60" />
@@ -118,7 +118,7 @@ export const SchemaBuilderPage: React.FC = () => {
                     <button className="p-2 text-muted hover:bg-border/50 rounded-lg transition-colors">
                       <div className="w-5 h-5 flex items-center justify-center">•••</div>
                     </button>
-                    <Button onClick={() => setIsAddTableModalOpen(true)} className="gap-2 px-5 shadow-sm rounded-lg bg-[#591C26] text-white hover:bg-[#4A161E]">
+                    <Button onClick={() => setIsAddTableModalOpen(true)} className="gap-2 px-5 shadow-sm rounded-lg bg-primary text-white hover:bg-primary/90">
                       <Plus className="w-4 h-4" /> New Table
                     </Button>
                   </div>
@@ -140,14 +140,14 @@ export const SchemaBuilderPage: React.FC = () => {
                     {detailedVersion?.tables?.length === 0 ? (
                       <div className="py-12">
                         <EmptyState 
-                          className="bg-white border border-dashed border-border/60 rounded-2xl h-96"
+                          className="bg-surface border border-dashed border-border/60 rounded-2xl h-96"
                           icon={<LayoutGrid className="w-10 h-10 text-primary/60" />}
                           title="No tables yet"
                           description="Get started by creating your first database table. You can add columns, set constraints, and define relationships."
                           action={
                             <Button 
                               onClick={() => setIsAddTableModalOpen(true)}
-                              className="bg-[#591C26] hover:bg-[#591C26]/90 text-white rounded-full px-6 shadow-md"
+                              className="bg-primary hover:bg-primary/90 text-white rounded-full px-6 shadow-md"
                             >
                               <Plus className="w-4 h-4 mr-2" />
                               Create Table
@@ -229,7 +229,7 @@ export const SchemaBuilderPage: React.FC = () => {
                 )}
                 
                 {activeTab === 'overview' && (
-                  <div className="p-12 text-center text-muted bg-white border border-border/50 rounded-2xl">
+                  <div className="p-12 text-center text-muted bg-surface border border-border/50 rounded-2xl">
                     Overview and Schema Statistics coming soon.
                   </div>
                 )}
@@ -240,13 +240,13 @@ export const SchemaBuilderPage: React.FC = () => {
       </div>
 
       {/* Right Sidebar */}
-      <div className="flex-shrink-0 h-full hidden lg:block bg-white z-10 shadow-[-5px_0_20px_-15px_rgba(0,0,0,0.1)]">
+      <div className="flex-shrink-0 h-full hidden lg:block bg-surface z-10 shadow-[-5px_0_20px_-15px_rgba(0,0,0,0.1)]">
         {activeSchemaId && detailedVersion ? (
           <SchemaRightSidebar 
             version={detailedVersion} 
           />
         ) : (
-          <div className="w-64 lg:w-72 xl:w-80 shrink-0 h-full bg-white border-l border-border/80 flex items-center justify-center p-6 text-center text-muted text-sm italic">
+          <div className="w-64 lg:w-72 xl:w-80 shrink-0 h-full bg-surface border-l border-border/80 flex items-center justify-center p-6 text-center text-muted text-sm italic">
             Select a schema to view details
           </div>
         )}
@@ -269,14 +269,14 @@ const TabButton = ({ active, onClick, label, count }: any) => (
     onClick={onClick}
     className={clsx(
       "pb-3 border-b-2 flex items-center gap-2 transition-colors",
-      active ? "border-[#591C26] text-[#591C26]" : "border-transparent hover:text-text"
+      active ? "border-primary text-primary" : "border-transparent hover:text-text"
     )}
   >
     {label}
     {count !== undefined && (
       <span className={clsx(
         "text-[10px] px-1.5 py-0.5 rounded-full font-bold",
-        active ? "bg-[#591C26]/10 text-[#591C26]" : "bg-border text-muted"
+        active ? "bg-primary/10 text-primary" : "bg-border text-muted"
       )}>
         {count}
       </span>

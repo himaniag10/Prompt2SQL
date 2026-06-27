@@ -27,7 +27,7 @@ export const SchemaRightSidebar: React.FC<SchemaRightSidebarProps> = ({ version 
           </h3>
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-background border border-border/80 rounded-xl p-3 shadow-sm">
-              <div className="text-2xl font-bold text-[#591C26]">{tableCount}</div>
+              <div className="text-2xl font-bold text-primary">{tableCount}</div>
               <div className="text-xs text-muted font-medium mt-1">Tables</div>
             </div>
             <div className="bg-background border border-border/80 rounded-xl p-3 shadow-sm">
@@ -60,8 +60,8 @@ export const SchemaRightSidebar: React.FC<SchemaRightSidebarProps> = ({ version 
         </div>
 
         {/* Tips */}
-        <div className="bg-[#591C26]/5 border border-[#591C26]/20 rounded-xl p-4">
-          <h3 className="text-[10px] font-bold text-[#591C26] uppercase tracking-wider mb-2 flex items-center gap-2">
+        <div className="bg-primary/5 border border-primary/20 rounded-xl p-4">
+          <h3 className="text-[10px] font-bold text-primary uppercase tracking-wider mb-2 flex items-center gap-2">
             <Lightbulb className="w-3.5 h-3.5" /> Pro Tip
           </h3>
           <p className="text-xs text-text leading-relaxed">

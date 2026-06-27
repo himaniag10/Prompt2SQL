@@ -75,7 +75,7 @@ export const ProjectsPage: React.FC = () => {
           <h1 className="text-3xl font-bold tracking-tight text-text">Projects</h1>
           <p className="text-muted mt-1">Manage your database projects and connections.</p>
         </div>
-        <Button onClick={() => setIsCreateModalOpen(true)} className="rounded-full shadow-sm px-6 gap-2 bg-[#591C26] text-white hover:bg-[#4A161E]">
+        <Button onClick={() => setIsCreateModalOpen(true)} className="rounded-full shadow-sm px-6 gap-2 bg-primary text-white hover:bg-primary/90">
           <FolderPlus className="w-4 h-4" />
           New Project
         </Button>
@@ -83,7 +83,7 @@ export const ProjectsPage: React.FC = () => {
       
       {isLoading ? (
         <div className="flex-1 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#591C26]"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
       ) : projects?.length === 0 ? (
         <div className="flex-1 border border-dashed border-border/60 rounded-2xl bg-surface/50 flex items-center justify-center">
@@ -92,7 +92,7 @@ export const ProjectsPage: React.FC = () => {
             title="No projects found"
             description="You haven't created any projects yet. Start by creating your first project."
             action={
-              <Button onClick={() => setIsCreateModalOpen(true)} size="md" className="gap-2 rounded-full px-6 border border-[#591C26] text-[#591C26] bg-transparent hover:bg-[#591C26]/5">
+              <Button onClick={() => setIsCreateModalOpen(true)} size="md" className="gap-2 rounded-full px-6 border border-primary text-primary bg-transparent hover:bg-primary/5">
                 <FolderPlus className="w-4 h-4" />
                 Create Project
               </Button>
@@ -105,11 +105,11 @@ export const ProjectsPage: React.FC = () => {
             <div 
               key={project.id} 
               onClick={() => handleOpen(project.id)}
-              className="bg-white border border-border/80 rounded-2xl p-6 hover:border-[#591C26]/40 hover:shadow-lg hover:shadow-[#591C26]/5 transition-all cursor-pointer group flex flex-col relative"
+              className="bg-surface border border-border/80 rounded-2xl p-6 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 transition-all cursor-pointer group flex flex-col relative"
             >
               <div className="flex items-start justify-between mb-4">
-                <div className="w-12 h-12 rounded-xl bg-[#591C26]/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Database className="w-6 h-6 text-[#591C26]" />
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Database className="w-6 h-6 text-primary" />
                 </div>
                 
                 <div className="flex items-center gap-2">
@@ -133,16 +133,16 @@ export const ProjectsPage: React.FC = () => {
 
                     {/* Dropdown Options */}
                     {activeDropdown === project.id && (
-                      <div className="absolute right-0 top-full mt-1 w-36 bg-white border border-border rounded-lg shadow-xl py-1 z-20">
+                      <div className="absolute right-0 top-full mt-1 w-36 bg-surface border border-border rounded-lg shadow-xl py-1 z-20">
                         <button 
                           onClick={(e) => { e.stopPropagation(); handleOpen(project.id); }}
-                          className="w-full text-left px-4 py-2 text-sm text-text hover:bg-[#591C26]/5 hover:text-[#591C26] flex items-center gap-2 transition-colors"
+                          className="w-full text-left px-4 py-2 text-sm text-text hover:bg-primary/5 hover:text-primary flex items-center gap-2 transition-colors"
                         >
                           <ExternalLink className="w-4 h-4" /> Open
                         </button>
                         <button 
                           onClick={(e) => handleEdit(e, project)}
-                          className="w-full text-left px-4 py-2 text-sm text-text hover:bg-[#591C26]/5 hover:text-[#591C26] flex items-center gap-2 transition-colors"
+                          className="w-full text-left px-4 py-2 text-sm text-text hover:bg-primary/5 hover:text-primary flex items-center gap-2 transition-colors"
                         >
                           <Edit2 className="w-4 h-4" /> Edit
                         </button>
@@ -158,7 +158,7 @@ export const ProjectsPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <h3 className="text-lg font-semibold text-text mb-1 group-hover:text-[#591C26] transition-colors">{project.name}</h3>
+              <h3 className="text-lg font-semibold text-text mb-1 group-hover:text-primary transition-colors">{project.name}</h3>
               <p className="text-sm text-muted line-clamp-2 flex-1 mb-6">
                 {project.description || 'No description provided.'}
               </p>
@@ -182,7 +182,7 @@ export const ProjectsPage: React.FC = () => {
       {/* Edit Project Modal (Reusing CreateProjectModal structure visually if possible, or build simple inline) */}
       {editingProject && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl border border-border w-full max-w-md p-6">
+          <div className="bg-surface rounded-2xl shadow-xl border border-border w-full max-w-md p-6">
             <h2 className="text-xl font-bold text-text mb-4">Edit Project</h2>
             <form onSubmit={(e) => {
               e.preventDefault();
@@ -202,7 +202,7 @@ export const ProjectsPage: React.FC = () => {
                     name="name" 
                     defaultValue={editingProject.name} 
                     required 
-                    className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm focus:border-[#591C26] focus:ring-1 focus:ring-[#591C26] outline-none"
+                    className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"
                   />
                 </div>
                 <div>
@@ -211,13 +211,13 @@ export const ProjectsPage: React.FC = () => {
                     name="description" 
                     defaultValue={editingProject.description || ''} 
                     rows={3}
-                    className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm focus:border-[#591C26] focus:ring-1 focus:ring-[#591C26] outline-none resize-none"
+                    className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none resize-none"
                   />
                 </div>
               </div>
               <div className="flex justify-end gap-3 mt-6">
                 <Button type="button" variant="outline" onClick={() => setEditingProject(null)}>Cancel</Button>
-                <Button type="submit" disabled={updateMutation.isPending} className="bg-[#591C26] text-white hover:bg-[#4A161E]">
+                <Button type="submit" disabled={updateMutation.isPending} className="bg-primary text-white hover:bg-primary/90">
                   {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
                 </Button>
               </div>

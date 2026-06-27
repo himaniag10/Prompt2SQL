@@ -40,7 +40,7 @@ export const GlossaryManager: React.FC<GlossaryManagerProps> = ({ version, schem
     <div className="flex flex-col gap-6 lg:flex-row pb-12 items-start h-full">
       {/* Left Column: Form */}
       <div className="w-full lg:w-1/3 space-y-6">
-        <div className="bg-white border border-border/80 p-6 rounded-2xl shadow-sm">
+        <div className="bg-surface border border-border/80 p-6 rounded-2xl shadow-sm">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-2 bg-primary/10 rounded-xl">
               <Book className="w-5 h-5 text-primary" />
@@ -70,7 +70,7 @@ export const GlossaryManager: React.FC<GlossaryManagerProps> = ({ version, schem
             className="w-full bg-surface border border-border rounded text-sm p-1.5 text-text focus:border-primary focus:outline-none" 
           />
           
-          <button type="submit" className="w-full py-3 bg-[#591C26] hover:bg-[#4A161E] text-white rounded-xl text-sm font-medium transition-all shadow-md active:scale-[0.98] disabled:opacity-70 flex items-center justify-center gap-2 mt-2">
+          <button type="submit" className="w-full py-3 bg-primary hover:bg-primary/90 text-white rounded-xl text-sm font-medium transition-all shadow-md active:scale-[0.98] disabled:opacity-70 flex items-center justify-center gap-2 mt-2">
             <Plus className="w-4 h-4" /> Add Term
           </button>
         </form>
@@ -84,7 +84,7 @@ export const GlossaryManager: React.FC<GlossaryManagerProps> = ({ version, schem
 
         {(!version.businessGlossary || version.businessGlossary.length === 0) ? (
           <EmptyState 
-            className="border border-dashed border-border/80 rounded-3xl bg-white h-full min-h-[400px]"
+            className="border border-dashed border-border/80 rounded-3xl bg-surface h-full min-h-[400px]"
             icon={<Book className="w-10 h-10 text-primary/60" />}
             title="No Glossary Terms"
             description="Define business terminology here to give AI better context about your schema."
@@ -92,7 +92,7 @@ export const GlossaryManager: React.FC<GlossaryManagerProps> = ({ version, schem
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {version.businessGlossary.map(term => (
-              <div key={term.id} className="bg-white border border-border/80 p-5 rounded-2xl group relative hover:border-[#591C26]/40 transition-colors shadow-sm hover:shadow-md flex flex-col h-full overflow-hidden">
+              <div key={term.id} className="bg-surface border border-border/80 p-5 rounded-2xl group relative hover:border-primary/40 transition-colors shadow-sm hover:shadow-md flex flex-col h-full overflow-hidden">
                 <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary/5 to-primary/20" />
                 <button 
                   onClick={() => deleteMutation.mutate(term.id)}
@@ -100,7 +100,7 @@ export const GlossaryManager: React.FC<GlossaryManagerProps> = ({ version, schem
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
-                <div className="font-semibold text-text mb-2 pr-8 text-[#591C26] text-lg">{term.term}</div>
+                <div className="font-semibold text-text mb-2 pr-8 text-primary text-lg">{term.term}</div>
                 <div className="text-muted text-sm leading-relaxed mb-4 flex-1">{term.definition}</div>
                 {term.example && (
                   <div className="text-xs bg-surface border border-border rounded-lg p-3 text-muted italic">
