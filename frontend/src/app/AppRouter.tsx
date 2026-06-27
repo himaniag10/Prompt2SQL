@@ -24,7 +24,7 @@ import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 
 export const AppRouter: React.FC = () => {
   return (
-    <BrowserRouter>
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AuthProvider>
         <Routes>
           {/* Public Routes with Main Layout */}
@@ -46,6 +46,7 @@ export const AppRouter: React.FC = () => {
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/projects" element={<ProjectsPage />} />
               <Route path="/schema" element={<SchemaBuilderPage />} />
+              <Route path="/projects/:projectId" element={<SchemaBuilderPage />} />
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
 

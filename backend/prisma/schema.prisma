@@ -1,5 +1,7 @@
 generator client {
   provider = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+  engineType = "binary"
 }
 
 datasource db {
@@ -195,6 +197,7 @@ model BusinessGlossary {
   schemaVersionId String
   term            String
   definition      String
+  example         String?
 
   schemaVersion   SchemaVersion @relation(fields: [schemaVersionId], references: [id], onDelete: Cascade)
 
