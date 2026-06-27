@@ -25,14 +25,18 @@ export const ColumnRow: React.FC<ColumnRowProps> = ({ index, column, projectId, 
   const updateMutation = useMutation({
     mutationFn: (data: Partial<TableColumn>) => SchemaApiService.updateColumn(column.id, data),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['schema', schemaId] });
       queryClient.invalidateQueries({ queryKey: ['schemas', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
     }
   });
 
   const deleteMutation = useMutation({
     mutationFn: () => SchemaApiService.deleteColumn(column.id),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['schema', schemaId] });
       queryClient.invalidateQueries({ queryKey: ['schemas', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
     }
   });
 

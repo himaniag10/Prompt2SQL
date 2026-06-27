@@ -22,6 +22,7 @@ export const SchemaSidebar: React.FC<SchemaSidebarProps> = ({ projectId, schemas
     mutationFn: (name: string) => SchemaApiService.createSchema(projectId, { name }),
     onSuccess: (newSchema) => {
       queryClient.invalidateQueries({ queryKey: ['schemas', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
       setIsCreating(false);
       setNewSchemaName('');
       onSelectSchema(newSchema.id);
@@ -32,6 +33,7 @@ export const SchemaSidebar: React.FC<SchemaSidebarProps> = ({ projectId, schemas
     mutationFn: SchemaApiService.deleteSchema,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['schemas', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
     }
   });
 

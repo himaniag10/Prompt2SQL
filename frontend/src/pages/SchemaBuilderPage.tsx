@@ -14,6 +14,7 @@ import { GlossaryManager } from '@/components/schema/GlossaryManager';
 import { CreateTableModal } from '@/components/schema/CreateTableModal';
 import { TableDetailView } from '@/components/schema/TableDetailView';
 import { Button } from '@/components/ui/Button';
+import { EmptyState } from '@/components/common/EmptyState';
 
 export const SchemaBuilderPage: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -137,15 +138,22 @@ export const SchemaBuilderPage: React.FC = () => {
                 {activeTab === 'tables' && (
                   <>
                     {detailedVersion?.tables?.length === 0 ? (
-                      <div className="flex-1 flex flex-col items-center justify-center text-center border border-dashed border-border/80 rounded-3xl bg-white py-20">
-                         <div className="w-16 h-16 bg-primary/5 rounded-2xl flex items-center justify-center mb-4">
-                           <LayoutGrid className="w-8 h-8 text-primary/60" />
-                         </div>
-                         <h3 className="text-lg font-bold text-text mb-2">No Tables Yet</h3>
-                         <p className="text-muted text-sm mb-6 max-w-sm">Create your first table to start building your database schema.</p>
-                         <Button onClick={() => setIsAddTableModalOpen(true)} variant="outline" className="gap-2 rounded-lg px-6 border-primary/30 text-primary hover:bg-primary/5">
-                           <Plus className="w-4 h-4" /> Create Table
-                         </Button>
+                      <div className="py-12">
+                        <EmptyState 
+                          className="bg-white border border-dashed border-border/60 rounded-2xl h-96"
+                          icon={<LayoutGrid className="w-10 h-10 text-primary/60" />}
+                          title="No tables yet"
+                          description="Get started by creating your first database table. You can add columns, set constraints, and define relationships."
+                          action={
+                            <Button 
+                              onClick={() => setIsAddTableModalOpen(true)}
+                              className="bg-[#591C26] hover:bg-[#591C26]/90 text-white rounded-full px-6 shadow-md"
+                            >
+                              <Plus className="w-4 h-4 mr-2" />
+                              Create Table
+                            </Button>
+                          }
+                        />
                       </div>
                     ) : (
                       <div className="flex flex-col gap-8 pb-12">

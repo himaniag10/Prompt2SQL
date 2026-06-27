@@ -1,6 +1,7 @@
 import React from 'react';
 import { SchemaVersion } from '@/services/schema.service';
-import { Lightbulb, Activity, GitMerge, Link as LinkIcon, DatabaseZap } from 'lucide-react';
+import { Lightbulb, Activity, GitMerge, Link as LinkIcon, DatabaseZap, LayoutGrid } from 'lucide-react';
+import { EmptyState } from '@/components/common/EmptyState';
 
 interface SchemaRightSidebarProps {
   version: SchemaVersion;
@@ -50,26 +51,12 @@ export const SchemaRightSidebar: React.FC<SchemaRightSidebarProps> = ({ version 
           <h3 className="text-[10px] font-bold text-muted uppercase tracking-wider mb-3 flex items-center gap-2">
             <Activity className="w-3.5 h-3.5" /> Recent Activity
           </h3>
-          <div className="space-y-3">
-            <div className="flex gap-3 items-start relative before:absolute before:left-[11px] before:top-6 before:bottom-[-16px] before:w-[2px] before:bg-border/60">
-              <div className="w-6 h-6 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0 border border-blue-500/20 z-10">
-                <GitMerge className="w-3 h-3 text-blue-500" />
-              </div>
-              <div>
-                <p className="text-xs text-text">Schema created</p>
-                <span className="text-[10px] text-muted">Version 1 initialized</span>
-              </div>
-            </div>
-            <div className="flex gap-3 items-start relative">
-              <div className="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0 border border-emerald-500/20 z-10">
-                <LinkIcon className="w-3 h-3 text-emerald-500" />
-              </div>
-              <div>
-                <p className="text-xs text-text">Ready for design</p>
-                <span className="text-[10px] text-muted">Waiting for tables...</span>
-              </div>
-            </div>
-          </div>
+          <EmptyState 
+            className="p-4 py-8 border border-dashed border-border/60 rounded-xl bg-background/50"
+            icon={<Activity className="w-6 h-6 text-muted" />}
+            title="No Activity"
+            description="No recent changes recorded for this schema."
+          />
         </div>
 
         {/* Tips */}
@@ -87,5 +74,3 @@ export const SchemaRightSidebar: React.FC<SchemaRightSidebarProps> = ({ version 
   );
 };
 
-// Temp import for missing icon above
-const LayoutGrid = ({className}: any) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>;

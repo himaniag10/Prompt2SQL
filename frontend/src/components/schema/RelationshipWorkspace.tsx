@@ -4,7 +4,7 @@ import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { Trash2, Link as LinkIcon, Plus, ArrowRight, GitMerge, Database } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { motion, AnimatePresence } from 'framer-motion';
-
+import { EmptyState } from '@/components/common/EmptyState';
 interface RelationshipWorkspaceProps {
   version: SchemaVersion;
   schemaId: string;
@@ -30,6 +30,7 @@ export const RelationshipWorkspace: React.FC<RelationshipWorkspaceProps> = ({ ve
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['schema', schemaId] });
       queryClient.invalidateQueries({ queryKey: ['schemas', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
       reset();
       setIsFormOpen(false);
     }
@@ -40,6 +41,7 @@ export const RelationshipWorkspace: React.FC<RelationshipWorkspaceProps> = ({ ve
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['schema', schemaId] });
       queryClient.invalidateQueries({ queryKey: ['schemas', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
     }
   });
 
@@ -134,13 +136,12 @@ export const RelationshipWorkspace: React.FC<RelationshipWorkspaceProps> = ({ ve
       <div className="w-full lg:w-2/3 space-y-4">
         
         {relationships.length === 0 ? (
-          <div className="flex flex-col items-center justify-center text-center p-12 border border-dashed border-border/80 rounded-3xl bg-white h-full">
-            <div className="w-16 h-16 bg-primary/5 rounded-2xl flex items-center justify-center mb-4">
-              <LinkIcon className="w-8 h-8 text-primary/60" />
-            </div>
-            <h3 className="text-lg font-bold text-text mb-2">No Relationships Created</h3>
-            <p className="text-muted text-sm max-w-sm">Use the builder on the left to define foreign key constraints between your tables.</p>
-          </div>
+          <EmptyState 
+            className="border border-dashed border-border/80 rounded-3xl bg-white h-full min-h-[400px]"
+            icon={<LinkIcon className="w-10 h-10 text-primary/60" />}
+            title="No Relationships Created"
+            description="Use the builder on the left to define foreign key constraints between your tables."
+          />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <AnimatePresence>
