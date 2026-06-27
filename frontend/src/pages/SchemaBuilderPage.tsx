@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useParams, useOutletContext } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { DatabaseZap, Plus, LayoutGrid, ChevronRight, Edit2 } from 'lucide-react';
 import { SchemaApiService } from '@/services/schema.service';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -17,8 +17,8 @@ import { Button } from '@/components/ui/Button';
 
 export const SchemaBuilderPage: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
-  
-  const [activeSchemaId, setActiveSchemaId] = useState<string | null>(null);
+  const { activeSchemaId, setActiveSchemaId } = useOutletContext<{ activeSchemaId: string | null, setActiveSchemaId: (id: string | null) => void }>();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<'tables' | 'relationships' | 'glossary' | 'overview'>('tables');
   const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
   const [isAddTableModalOpen, setIsAddTableModalOpen] = useState(false);
@@ -60,13 +60,24 @@ export const SchemaBuilderPage: React.FC = () => {
       {/* Center Workspace */}
       <div className="flex-1 flex flex-col relative overflow-hidden bg-[#FAFAFA] min-w-0">
         
-        {/* Top Breadcrumb Header */}
+        {/* Schema Workspace Header */}
         {activeSchema && (
-          <div className="h-14 border-b border-border/80 bg-white flex items-center justify-between px-6 z-10 shrink-0">
-            <div className="flex items-center gap-2 text-sm text-muted font-medium">
-              <span className="hover:text-text cursor-pointer transition-colors">Project</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-              <span className="text-text">{activeSchema.name}</span>
+          <div className="h-14 border-b border-border/80 bg-white flex items-center justify-between px-6 z-20 shrink-0 shadow-sm sticky top-0">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <span className="text-text font-bold flex items-center gap-2">
+                  {activeSchema.name}
+                  <button className="text-muted hover:text-[#591C26] transition-colors p-1 rounded hover:bg-surface">
+                    <Edit2 className="w-3.5 h-3.5" />
+                  </button>
+                </span>
+              </div>
+              <span className="px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 border border-blue-500/20 text-[10px] font-bold tracking-wide">
+                v{detailedVersion?.versionNumber || 1}.0
+              </span>
+              <span className="text-xs text-muted/60 hidden md:block border-l border-border pl-3 ml-1">
+                Last updated just now
+              </span>
             </div>
           </div>
         )}
