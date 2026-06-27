@@ -36,6 +36,11 @@ enum MessageRole {
   SYSTEM
 }
 
+enum OtpPurpose {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
 // ----------------------------------------
 // MODELS
 // ----------------------------------------
@@ -52,6 +57,21 @@ model User {
   deletedAt DateTime?
 
   projects  Project[]
+}
+
+model Otp {
+  id        String     @id @default(uuid())
+  email     String
+  otpHash   String
+  purpose   OtpPurpose
+  payload   Json?
+  
+  expiresAt DateTime
+  attempts  Int        @default(0)
+  createdAt DateTime   @default(now())
+
+  @@index([email])
+  @@index([expiresAt])
 }
 
 model Project {

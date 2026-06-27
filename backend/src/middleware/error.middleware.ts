@@ -4,8 +4,16 @@ import env from '../config/env';
 import { AppError } from '../shared/errors/AppError';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const errorHandler = (err: Error | AppError, req: Request, res: Response, next: NextFunction) => {
+export const errorHandler = (err: Error | AppError | any, req: Request, res: Response, next: NextFunction) => {
   logger.error(err.stack || err.message);
+
+  if (err.name === 'ZodError') {
+    return res.status(400).json({
+      status: 'error',
+      message: 'Validation failed',
+      details: err.errors,
+    });
+  }
 
   let statusCode = 500;
   let message = 'Internal Server Error';
