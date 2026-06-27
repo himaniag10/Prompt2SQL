@@ -1,157 +1,241 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { EmptyState } from '@/components/common/EmptyState';
-import { DatabaseZap, Plus } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { DatabaseZap, Plus, LayoutGrid, ChevronRight, Edit2 } from 'lucide-react';
 import { SchemaApiService } from '@/services/schema.service';
+import { motion, AnimatePresence } from 'framer-motion';
+import { clsx } from 'clsx';
 
 import { SchemaSidebar } from '@/components/schema/SchemaSidebar';
 import { TableCard } from '@/components/schema/TableCard';
 import { RelationshipManager } from '@/components/schema/RelationshipManager';
 import { GlossaryManager } from '@/components/schema/GlossaryManager';
-import { SummaryPanel } from '@/components/schema/SummaryPanel';
+import { CreateTableModal } from '@/components/schema/CreateTableModal';
+import { TableDetailView } from '@/components/schema/TableDetailView';
 import { Button } from '@/components/ui/Button';
 
 export const SchemaBuilderPage: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
-  const queryClient = useQueryClient();
   
   const [activeSchemaId, setActiveSchemaId] = useState<string | null>(null);
-  const [rightPanel, setRightPanel] = useState<'relationships' | 'glossary' | 'summary' | null>('summary');
+  const [activeTab, setActiveTab] = useState<'tables' | 'relationships' | 'glossary' | 'overview'>('tables');
+  const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
+  const [isAddTableModalOpen, setIsAddTableModalOpen] = useState(false);
 
-  const { data: schemas, isLoading } = useQuery({
+  // 1. Fetch lightweight schema list for the sidebar
+  const { data: schemas, isLoading: isSchemasLoading } = useQuery({
     queryKey: ['schemas', projectId],
     queryFn: () => SchemaApiService.getSchemas(projectId!),
-    enabled: !!projectId,
+    enabled: !!projectId && projectId !== 'undefined',
+  });
+
+  // 2. Fetch fully detailed active schema for the main canvas
+  const { data: activeSchemaData, isLoading: isActiveSchemaLoading } = useQuery({
+    queryKey: ['schema', activeSchemaId],
+    queryFn: () => SchemaApiService.getSchema(activeSchemaId!),
+    enabled: !!activeSchemaId,
   });
 
   const activeSchema = schemas?.find(s => s.id === activeSchemaId);
-  const activeVersion = activeSchema?.versions?.[0]; // Always work with the latest version for now
+  const detailedVersion = activeSchemaData?.versions?.[0];
 
-  const addTableMutation = useMutation({
-    mutationFn: () => SchemaApiService.createTable(activeSchemaId!, { name: 'new_table' }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['schemas', projectId] });
-    }
-  });
+  const isLoading = isSchemasLoading || (!!activeSchemaId && isActiveSchemaLoading);
 
   return (
-    <div className="h-full flex overflow-hidden">
+    <div className="h-full flex overflow-hidden bg-background">
       {/* Left Sidebar: Schema List */}
-      <SchemaSidebar 
-        projectId={projectId!}
-        schemas={schemas || []}
-        activeSchemaId={activeSchemaId}
-        onSelectSchema={setActiveSchemaId}
-      />
+      <div className="flex-shrink-0 h-full">
+        <SchemaSidebar 
+          projectId={projectId!}
+          schemas={schemas || []}
+          activeSchemaId={activeSchemaId}
+          onSelectSchema={(id) => {
+             setActiveSchemaId(id);
+             setSelectedTableId(null);
+          }}
+        />
+      </div>
 
-      {/* Main Canvas Area */}
-      <div className="flex-1 flex flex-col relative overflow-hidden bg-background">
-        {/* Toolbar */}
+      {/* Center Workspace */}
+      <div className="flex-1 flex flex-col relative overflow-hidden bg-[#FAFAFA]">
+        
+        {/* Top Breadcrumb Header */}
         {activeSchema && (
-          <div className="h-14 border-b border-border bg-surface/50 flex items-center justify-between px-4">
-            <div className="flex items-center gap-3">
-              <h1 className="font-semibold text-text">{activeSchema.name}</h1>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-                v{activeVersion?.versionNumber || 1}
-              </span>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => setRightPanel(rightPanel === 'summary' ? null : 'summary')}
-                className={rightPanel === 'summary' ? 'bg-primary/10 border-primary/50' : ''}
-              >
-                Summary
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => setRightPanel(rightPanel === 'relationships' ? null : 'relationships')}
-                className={rightPanel === 'relationships' ? 'bg-primary/10 border-primary/50' : ''}
-              >
-                Relationships
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => setRightPanel(rightPanel === 'glossary' ? null : 'glossary')}
-                className={rightPanel === 'glossary' ? 'bg-primary/10 border-primary/50' : ''}
-              >
-                Glossary
-              </Button>
-              <div className="w-px h-6 bg-border mx-2"></div>
-              <Button size="sm" className="gap-1" onClick={() => addTableMutation.mutate()}>
-                <Plus className="w-4 h-4" /> Add Table
-              </Button>
+          <div className="h-14 border-b border-border/80 bg-white flex items-center justify-between px-6 z-10 shrink-0">
+            <div className="flex items-center gap-2 text-sm text-muted font-medium">
+              <span className="hover:text-text cursor-pointer transition-colors">Project</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+              <span className="text-text">{activeSchema.name}</span>
             </div>
           </div>
         )}
 
-        {/* Canvas */}
-        <div className="flex-1 overflow-auto p-6 relative">
+        {/* Canvas Area */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-6 lg:p-8 relative scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
           {isLoading ? (
              <div className="h-full flex items-center justify-center">
-               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+               <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
              </div>
           ) : !activeSchemaId ? (
-            <div className="h-full border border-dashed border-border/60 rounded-2xl bg-surface/30 flex items-center justify-center">
-              <EmptyState
-                icon={<DatabaseZap className="h-10 w-10 text-primary/60" />}
-                title="No active schema"
-                description="Select a schema from the sidebar or create a new one."
-              />
-            </div>
-          ) : activeVersion?.tables?.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center">
-               <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-4">
-                 <DatabaseZap className="w-8 h-8 text-primary" />
-               </div>
-               <h3 className="text-lg font-semibold text-text mb-2">Empty Schema</h3>
-               <p className="text-muted max-w-sm mb-6">Start designing your database schema by adding your first table.</p>
-               <Button onClick={() => addTableMutation.mutate()} className="gap-2 rounded-full px-6">
-                 <Plus className="w-4 h-4" /> Add Table
-               </Button>
+            <div className="h-full border border-dashed border-border/80 rounded-3xl bg-white flex items-center justify-center">
+              <div className="flex flex-col items-center justify-center text-center p-8 max-w-sm">
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                  <DatabaseZap className="w-8 h-8 text-primary/60" />
+                </div>
+                <h3 className="text-lg font-semibold text-text mb-2">No active schema</h3>
+                <p className="text-sm text-muted">Select a schema from the sidebar or create a new one to begin modeling your database.</p>
+              </div>
             </div>
           ) : (
-            <div className="max-w-4xl mx-auto pb-20">
-              {activeVersion?.tables?.map(table => (
-                <TableCard 
-                  key={table.id} 
-                  table={table} 
-                  projectId={projectId!} 
-                  tables={activeVersion.tables} 
-                  schemaId={activeSchemaId!} 
-                />
-              ))}
+            <div className="max-w-6xl mx-auto h-full flex flex-col">
+              
+              {/* Workspace Header & Tabs */}
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <h1 className="text-2xl font-bold text-text tracking-tight flex items-center gap-2">
+                      {activeSchema?.name}
+                      <button className="p-1.5 text-muted hover:bg-border/50 rounded-md transition-colors"><Edit2 className="w-4 h-4" /></button>
+                    </h1>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                      v{detailedVersion?.versionNumber || 1}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button className="p-2 text-muted hover:bg-border/50 rounded-lg transition-colors">
+                      <div className="w-5 h-5 flex items-center justify-center">•••</div>
+                    </button>
+                    <Button onClick={() => setIsAddTableModalOpen(true)} className="gap-2 px-5 shadow-sm rounded-lg bg-[#591C26] text-white hover:bg-[#4A161E]">
+                      <Plus className="w-4 h-4" /> New Table
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Main Tabs */}
+                <div className="flex items-center gap-6 border-b border-border/80 text-sm font-semibold text-muted">
+                  <TabButton active={activeTab === 'tables'} onClick={() => setActiveTab('tables')} label="Tables" count={detailedVersion?.tables?.length || 0} />
+                  <TabButton active={activeTab === 'relationships'} onClick={() => setActiveTab('relationships')} label="Relationships" count={detailedVersion?.relationships?.length || 0} />
+                  <TabButton active={activeTab === 'glossary'} onClick={() => setActiveTab('glossary')} label="Glossary" count={detailedVersion?.businessGlossary?.length || 0} />
+                  <TabButton active={activeTab === 'overview'} onClick={() => setActiveTab('overview')} label="Overview" />
+                </div>
+              </div>
+
+              {/* Tab Contents */}
+              <div className="flex-1 flex flex-col">
+                {activeTab === 'tables' && (
+                  <>
+                    {detailedVersion?.tables?.length === 0 ? (
+                      <div className="flex-1 flex flex-col items-center justify-center text-center border border-dashed border-border/80 rounded-3xl bg-white py-20">
+                         <div className="w-16 h-16 bg-primary/5 rounded-2xl flex items-center justify-center mb-4">
+                           <LayoutGrid className="w-8 h-8 text-primary/60" />
+                         </div>
+                         <h3 className="text-lg font-bold text-text mb-2">No Tables Yet</h3>
+                         <p className="text-muted text-sm mb-6 max-w-sm">Create your first table to start building your database schema.</p>
+                         <Button onClick={() => setIsAddTableModalOpen(true)} variant="outline" className="gap-2 rounded-lg px-6 border-primary/30 text-primary hover:bg-primary/5">
+                           <Plus className="w-4 h-4" /> Create Table
+                         </Button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-8 pb-12">
+                        {/* Horizontal Grid of Table Cards */}
+                        <div className="flex flex-wrap gap-4">
+                          {detailedVersion?.tables?.map(table => (
+                            <TableCard 
+                              key={table.id}
+                              table={table} 
+                              projectId={projectId!} 
+                              isSelected={selectedTableId === table.id}
+                              onClick={() => setSelectedTableId(table.id === selectedTableId ? null : table.id)}
+                            />
+                          ))}
+                        </div>
+
+                        {/* Selected Table Detail View below the grid */}
+                        <AnimatePresence mode="wait">
+                          {selectedTableId && detailedVersion && (
+                             <motion.div
+                               key={selectedTableId}
+                               initial={{ opacity: 0, y: 10 }}
+                               animate={{ opacity: 1, y: 0 }}
+                               exit={{ opacity: 0, y: -10 }}
+                               transition={{ duration: 0.2 }}
+                             >
+                                <TableDetailView 
+                                  table={detailedVersion.tables.find(t => t.id === selectedTableId)!}
+                                  schemaId={activeSchemaId!}
+                                  projectId={projectId!}
+                                  allTables={detailedVersion.tables}
+                                />
+                             </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {activeTab === 'glossary' && detailedVersion && (
+                  <GlossaryManager 
+                    version={detailedVersion} 
+                    schemaId={activeSchemaId!} 
+                    projectId={projectId!} 
+                  />
+                )}
+                
+                {activeTab === 'overview' && (
+                  <div className="p-12 text-center text-muted bg-white border border-border/50 rounded-2xl">
+                    Overview and Schema Statistics coming soon.
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* Right Sidebar: Contextual Panel */}
-      {rightPanel === 'summary' && activeSchemaId && activeVersion && (
-        <SummaryPanel 
-          version={activeVersion}
-          schemaName={activeSchema.name}
-        />
-      )}
-      {rightPanel === 'relationships' && activeSchemaId && activeVersion && (
-        <RelationshipManager 
-          version={activeVersion} 
-          schemaId={activeSchemaId} 
-          projectId={projectId!} 
-        />
-      )}
-      {rightPanel === 'glossary' && activeSchemaId && activeVersion && (
-        <GlossaryManager 
-          version={activeVersion} 
-          schemaId={activeSchemaId} 
-          projectId={projectId!} 
-        />
-      )}
+      {/* Right Sidebar: Relationships */}
+      <div className="flex-shrink-0 h-full hidden lg:block bg-white z-10 shadow-[-5px_0_20px_-15px_rgba(0,0,0,0.1)]">
+        {activeSchemaId && detailedVersion ? (
+          <RelationshipManager 
+            version={detailedVersion} 
+            schemaId={activeSchemaId} 
+            projectId={projectId!} 
+          />
+        ) : (
+          <div className="w-80 h-full bg-white border-l border-border/80 flex items-center justify-center p-6 text-center text-muted text-sm italic">
+            Select a schema to view relationships
+          </div>
+        )}
+      </div>
+
+      {/* Add Table Modal */}
+      <CreateTableModal 
+        isOpen={isAddTableModalOpen}
+        onClose={() => setIsAddTableModalOpen(false)}
+        schemaId={activeSchemaId!}
+        projectId={projectId!}
+        existingTables={detailedVersion?.tables || []}
+      />
     </div>
   );
 };
+
+const TabButton = ({ active, onClick, label, count }: any) => (
+  <button
+    onClick={onClick}
+    className={clsx(
+      "pb-3 border-b-2 flex items-center gap-2 transition-colors",
+      active ? "border-[#591C26] text-[#591C26]" : "border-transparent hover:text-text"
+    )}
+  >
+    {label}
+    {count !== undefined && (
+      <span className={clsx(
+        "text-[10px] px-1.5 py-0.5 rounded-full font-bold",
+        active ? "bg-[#591C26]/10 text-[#591C26]" : "bg-border text-muted"
+      )}>
+        {count}
+      </span>
+    )}
+  </button>
+);

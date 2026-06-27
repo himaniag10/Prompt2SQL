@@ -22,6 +22,7 @@ export interface DatabaseSchema {
   name: string;
   description: string | null;
   createdAt: string;
+  updatedAt: string;
   versions: SchemaVersion[];
 }
 
