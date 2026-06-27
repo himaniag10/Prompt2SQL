@@ -84,6 +84,13 @@ export const SchemaApiService = {
     const response = await api.post('/projects', data);
     return response.data;
   },
+  updateProject: async (projectId: string, data: { name?: string; description?: string }): Promise<Project> => {
+    const response = await api.put(`/projects/${projectId}`, data);
+    return response.data;
+  },
+  deleteProject: async (projectId: string): Promise<void> => {
+    await api.delete(`/projects/${projectId}`);
+  },
   
   // Schemas
   getSchemas: async (projectId: string): Promise<DatabaseSchema[]> => {
