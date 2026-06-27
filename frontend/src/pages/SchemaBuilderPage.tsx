@@ -146,7 +146,23 @@ export const SchemaBuilderPage: React.FC = () => {
                               table={table} 
                               projectId={projectId!} 
                               isSelected={selectedTableId === table.id}
+                              relationships={detailedVersion.relationships}
                               onClick={() => setSelectedTableId(table.id === selectedTableId ? null : table.id)}
+                              onDelete={() => {
+                                if (window.confirm(`Are you sure you want to delete the table ${table.name}?`)) {
+                                  SchemaApiService.deleteTable(table.id).then(() => {
+                                    queryClient.invalidateQueries({ queryKey: ['schema', activeSchemaId] });
+                                    queryClient.invalidateQueries({ queryKey: ['schemas', projectId] });
+                                  });
+                                }
+                              }}
+                              onEdit={() => {
+                                // For now, just expand the card which opens the detailed view
+                                setSelectedTableId(table.id);
+                              }}
+                              onDuplicate={() => {
+                                alert('Duplicate table feature coming soon!');
+                              }}
                             />
                           ))}
                         </div>

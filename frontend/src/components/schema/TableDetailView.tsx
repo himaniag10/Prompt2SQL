@@ -15,7 +15,7 @@ interface TableDetailViewProps {
 
 export const TableDetailView: React.FC<TableDetailViewProps> = ({ table, schemaId, projectId, allTables }) => {
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<'columns' | 'constraints' | 'indexes' | 'notes'>('columns');
+  const [activeTab, setActiveTab] = useState<'columns' | 'constraints' | 'indexes' | 'relationships' | 'notes'>('columns');
 
   const updateMutation = useMutation({
     mutationFn: (name: string) => SchemaApiService.updateTable(table.id, { name }),
@@ -75,6 +75,7 @@ export const TableDetailView: React.FC<TableDetailViewProps> = ({ table, schemaI
         <DetailTabButton active={activeTab === 'columns'} onClick={() => setActiveTab('columns')} label="Columns" />
         <DetailTabButton active={activeTab === 'constraints'} onClick={() => setActiveTab('constraints')} label="Constraints" />
         <DetailTabButton active={activeTab === 'indexes'} onClick={() => setActiveTab('indexes')} label="Indexes" />
+        <DetailTabButton active={activeTab === 'relationships'} onClick={() => setActiveTab('relationships')} label="Relationships" />
         <DetailTabButton active={activeTab === 'notes'} onClick={() => setActiveTab('notes')} label="Notes" />
       </div>
 
@@ -126,6 +127,7 @@ export const TableDetailView: React.FC<TableDetailViewProps> = ({ table, schemaI
 
         {activeTab === 'constraints' && <PlaceholderTab icon={<ShieldAlert />} text="Constraint management is mapped from the column definitions." />}
         {activeTab === 'indexes' && <PlaceholderTab icon={<Hash />} text="Index management coming soon." />}
+        {activeTab === 'relationships' && <PlaceholderTab icon={<Hash />} text="Relationships are managed globally in the Relationships tab." />}
         
         {activeTab === 'notes' && (
           <div className="p-6">
