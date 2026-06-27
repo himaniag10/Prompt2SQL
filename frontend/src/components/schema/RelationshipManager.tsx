@@ -28,6 +28,7 @@ export const RelationshipManager: React.FC<RelationshipManagerProps> = ({ versio
   const createMutation = useMutation({
     mutationFn: (data: any) => SchemaApiService.createRelationship(schemaId, data),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['schema', schemaId] });
       queryClient.invalidateQueries({ queryKey: ['schemas', projectId] });
       reset();
       setIsFormOpen(false);
@@ -37,6 +38,7 @@ export const RelationshipManager: React.FC<RelationshipManagerProps> = ({ versio
   const deleteMutation = useMutation({
     mutationFn: SchemaApiService.deleteRelationship,
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['schema', schemaId] });
       queryClient.invalidateQueries({ queryKey: ['schemas', projectId] });
     }
   });
@@ -50,7 +52,7 @@ export const RelationshipManager: React.FC<RelationshipManagerProps> = ({ versio
     tables.find(t => t.id === tableId)?.columns?.find(c => c.id === colId)?.name || 'Unknown Column';
 
   return (
-    <div className="flex flex-col h-full bg-surface border-l border-border w-80 shadow-[-10px_0_30px_-15px_rgba(0,0,0,0.1)]">
+    <div className="flex flex-col h-full bg-surface border-l border-border w-64 lg:w-72 xl:w-80 shrink-0 shadow-[-10px_0_30px_-15px_rgba(0,0,0,0.1)]">
       <div className="p-4 border-b border-border bg-background/80 backdrop-blur-sm flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-2">
           <div className="p-1.5 bg-primary/10 rounded-md">

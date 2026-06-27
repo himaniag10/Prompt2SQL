@@ -28,7 +28,10 @@ export class SchemaRepository {
       include: {
         versions: {
           orderBy: { versionNumber: 'desc' },
-          take: 1
+          take: 1,
+          include: {
+            tables: { select: { id: true } }
+          }
         }
       }
     });

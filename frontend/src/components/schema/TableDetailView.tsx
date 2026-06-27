@@ -22,6 +22,7 @@ export const TableDetailView: React.FC<TableDetailViewProps> = ({ table, schemaI
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['schema', schemaId] });
       queryClient.invalidateQueries({ queryKey: ['schemas', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['project', projectId] });
     }
   });
 
@@ -30,6 +31,7 @@ export const TableDetailView: React.FC<TableDetailViewProps> = ({ table, schemaI
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['schema', schemaId] });
       queryClient.invalidateQueries({ queryKey: ['schemas', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['project', projectId] });
     }
   });
 

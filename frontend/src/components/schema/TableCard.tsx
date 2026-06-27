@@ -20,7 +20,7 @@ export const TableCard: React.FC<TableCardProps> = ({ table, isSelected, onClick
       whileHover={{ y: -2 }}
       onClick={onClick}
       className={clsx(
-        "bg-white border rounded-xl p-4 cursor-pointer transition-all w-64 shadow-sm flex flex-col gap-3 group relative overflow-hidden",
+        "bg-white border rounded-xl p-4 cursor-pointer transition-all flex-1 min-w-[200px] max-w-[280px] shadow-sm flex flex-col gap-3 group relative overflow-hidden",
         isSelected 
           ? "border-[#591C26]/40 shadow-md ring-1 ring-[#591C26]/20 bg-[#591C26]/5" 
           : "border-border/80 hover:border-border hover:shadow-md"

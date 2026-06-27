@@ -157,6 +157,8 @@ export const CreateTableModal: React.FC<CreateTableModalProps> = ({ isOpen, onCl
 
       // Success
       queryClient.invalidateQueries({ queryKey: ['schemas', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['schema', schemaId] });
+      queryClient.invalidateQueries({ queryKey: ['project', projectId] });
       onClose();
     } catch (err: any) {
       setError(err.response?.data?.error || err.message || 'Failed to create table');

@@ -8,7 +8,8 @@ import { clsx } from 'clsx';
 
 import { SchemaSidebar } from '@/components/schema/SchemaSidebar';
 import { TableCard } from '@/components/schema/TableCard';
-import { RelationshipManager } from '@/components/schema/RelationshipManager';
+import { RelationshipWorkspace } from '@/components/schema/RelationshipWorkspace';
+import { SchemaRightSidebar } from '@/components/schema/SchemaRightSidebar';
 import { GlossaryManager } from '@/components/schema/GlossaryManager';
 import { CreateTableModal } from '@/components/schema/CreateTableModal';
 import { TableDetailView } from '@/components/schema/TableDetailView';
@@ -57,7 +58,7 @@ export const SchemaBuilderPage: React.FC = () => {
       </div>
 
       {/* Center Workspace */}
-      <div className="flex-1 flex flex-col relative overflow-hidden bg-[#FAFAFA]">
+      <div className="flex-1 flex flex-col relative overflow-hidden bg-[#FAFAFA] min-w-0">
         
         {/* Top Breadcrumb Header */}
         {activeSchema && (
@@ -87,7 +88,7 @@ export const SchemaBuilderPage: React.FC = () => {
               </div>
             </div>
           ) : (
-            <div className="max-w-6xl mx-auto h-full flex flex-col">
+            <div className="w-full max-w-7xl mx-auto h-full flex flex-col">
               
               {/* Workspace Header & Tabs */}
               <div className="mb-6">
@@ -174,6 +175,16 @@ export const SchemaBuilderPage: React.FC = () => {
                   </>
                 )}
 
+                {activeTab === 'relationships' && detailedVersion && (
+                  <div className="h-full">
+                    <RelationshipWorkspace 
+                      version={detailedVersion} 
+                      schemaId={activeSchemaId!} 
+                      projectId={projectId!} 
+                    />
+                  </div>
+                )}
+
                 {activeTab === 'glossary' && detailedVersion && (
                   <GlossaryManager 
                     version={detailedVersion} 
@@ -193,17 +204,15 @@ export const SchemaBuilderPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Right Sidebar: Relationships */}
+      {/* Right Sidebar */}
       <div className="flex-shrink-0 h-full hidden lg:block bg-white z-10 shadow-[-5px_0_20px_-15px_rgba(0,0,0,0.1)]">
         {activeSchemaId && detailedVersion ? (
-          <RelationshipManager 
+          <SchemaRightSidebar 
             version={detailedVersion} 
-            schemaId={activeSchemaId} 
-            projectId={projectId!} 
           />
         ) : (
-          <div className="w-80 h-full bg-white border-l border-border/80 flex items-center justify-center p-6 text-center text-muted text-sm italic">
-            Select a schema to view relationships
+          <div className="w-64 lg:w-72 xl:w-80 shrink-0 h-full bg-white border-l border-border/80 flex items-center justify-center p-6 text-center text-muted text-sm italic">
+            Select a schema to view details
           </div>
         )}
       </div>

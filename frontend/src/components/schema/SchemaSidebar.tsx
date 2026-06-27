@@ -49,7 +49,7 @@ export const SchemaSidebar: React.FC<SchemaSidebarProps> = ({ projectId, schemas
   };
 
   return (
-    <div className="w-80 border-r border-border/80 bg-surface/50 h-full flex flex-col">
+    <div className="w-64 lg:w-72 xl:w-80 shrink-0 border-r border-border/80 bg-surface/50 h-full flex flex-col">
       <div className="p-5 pb-3">
         <h2 className="text-sm font-bold text-text mb-4 tracking-wide">Schemas</h2>
         <div className="relative">
