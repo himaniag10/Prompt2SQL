@@ -47,8 +47,8 @@ export const RegisterPage: React.FC = () => {
   const onSubmit = async (data: RegisterForm) => {
     try {
       setError(null);
-      await registerUser(data);
-      navigate('/dashboard');
+      const email = await registerUser(data);
+      navigate(`/verify-email?email=${encodeURIComponent(email)}`);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to register');
     }

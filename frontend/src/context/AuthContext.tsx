@@ -12,7 +12,11 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (data: any) => Promise<void>;
-  register: (data: any) => Promise<void>;
+  register: (data: any) => Promise<string>;
+  verifyEmail: (data: any) => Promise<void>;
+  resendOtp: (data: any) => Promise<void>;
+  forgotPassword: (data: any) => Promise<void>;
+  resetPassword: (data: any) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -52,9 +56,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const register = async (data: any) => {
-    const res = await api.post('/auth/register', data);
+    await api.post('/auth/register', data);
+    return data.email; // Return email to transition to OTP screen
+  };
+
+  const verifyEmail = async (data: any) => {
+    const res = await api.post('/auth/verify-email', data);
     localStorage.setItem('accessToken', res.data.accessToken);
     setUser(res.data.user);
+  };
+
+  const resendOtp = async (data: any) => {
+    await api.post('/auth/resend-otp', data);
+  };
+
+  const forgotPassword = async (data: any) => {
+    await api.post('/auth/forgot-password', data);
+  };
+
+  const resetPassword = async (data: any) => {
+    await api.post('/auth/reset-password', data);
   };
 
   const logout = async () => {
@@ -69,7 +90,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, verifyEmail, resendOtp, forgotPassword, resetPassword, logout }}>
       {children}
     </AuthContext.Provider>
   );
