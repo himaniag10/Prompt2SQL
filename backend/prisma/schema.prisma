@@ -1,0 +1,231 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ----------------------------------------
+// ENUMS
+// ----------------------------------------
+enum DatabaseType {
+  MYSQL
+  POSTGRESQL
+  SQLITE
+  SQLSERVER
+  ORACLE
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum RelationshipType {
+  ONE_TO_ONE
+  ONE_TO_MANY
+  MANY_TO_ONE
+  MANY_TO_MANY
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+// ----------------------------------------
+// MODELS
+// ----------------------------------------
+
+model User {
+  id        String    @id @default(uuid())
+  name      String
+  email     String    @unique
+  password  String
+  role      UserRole  @default(USER)
+  
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  projects  Project[]
+}
+
+model Project {
+  id           String       @id @default(uuid())
+  ownerId      String
+  name         String
+  description  String?
+  databaseType DatabaseType
+
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  deletedAt    DateTime?
+
+  owner        User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  schemas      DatabaseSchema[]
+  chats        Chat[]
+
+  @@index([ownerId])
+  @@index([createdAt])
+  @@index([updatedAt])
+}
+
+model DatabaseSchema {
+  id          String    @id @default(uuid())
+  projectId   String
+  name        String
+  description String?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  versions    SchemaVersion[]
+
+  @@index([projectId])
+}
+
+model SchemaVersion {
+  id               String   @id @default(uuid())
+  databaseSchemaId String
+  versionNumber    Int
+  createdBy        String?
+
+  createdAt        DateTime @default(now())
+
+  databaseSchema   DatabaseSchema @relation(fields: [databaseSchemaId], references: [id], onDelete: Cascade)
+  tables           DatabaseTable[]
+  relationships    Relationship[]
+  businessGlossary BusinessGlossary[]
+  chats            Chat[]
+
+  @@index([databaseSchemaId])
+}
+
+model DatabaseTable {
+  id              String   @id @default(uuid())
+  schemaVersionId String
+  name            String
+  description     String?
+
+  createdAt       DateTime @default(now())
+
+  schemaVersion   SchemaVersion @relation(fields: [schemaVersionId], references: [id], onDelete: Cascade)
+  columns         TableColumn[]
+
+  // Foreign key relationships
+  sourceRelationships Relationship[] @relation("SourceTable")
+  targetRelationships Relationship[] @relation("TargetTable")
+
+  @@unique([schemaVersionId, name])
+  @@index([schemaVersionId])
+}
+
+model TableColumn {
+  id              String   @id @default(uuid())
+  tableId         String
+  name            String
+  datatype        String
+  nullable        Boolean  @default(false)
+  primaryKey      Boolean  @default(false)
+  foreignKey      Boolean  @default(false)
+  unique          Boolean  @default(false)
+  defaultValue    String?
+  description     String?
+
+  table           DatabaseTable @relation(fields: [tableId], references: [id], onDelete: Cascade)
+
+  // Foreign key relationships
+  sourceRelationships Relationship[] @relation("SourceColumn")
+  targetRelationships Relationship[] @relation("TargetColumn")
+
+  @@unique([tableId, name])
+  @@index([tableId])
+}
+
+model Relationship {
+  id               String   @id @default(uuid())
+  schemaVersionId  String
+
+  sourceTableId    String
+  sourceColumnId   String
+  targetTableId    String
+  targetColumnId   String
+  relationshipType RelationshipType
+
+  schemaVersion    SchemaVersion @relation(fields: [schemaVersionId], references: [id], onDelete: Cascade)
+  
+  sourceTable      DatabaseTable @relation("SourceTable", fields: [sourceTableId], references: [id], onDelete: Restrict)
+  sourceColumn     TableColumn   @relation("SourceColumn", fields: [sourceColumnId], references: [id], onDelete: Restrict)
+  targetTable      DatabaseTable @relation("TargetTable", fields: [targetTableId], references: [id], onDelete: Restrict)
+  targetColumn     TableColumn   @relation("TargetColumn", fields: [targetColumnId], references: [id], onDelete: Restrict)
+
+  @@index([schemaVersionId])
+  @@index([sourceTableId])
+  @@index([targetTableId])
+}
+
+model BusinessGlossary {
+  id              String   @id @default(uuid())
+  schemaVersionId String
+  term            String
+  definition      String
+
+  schemaVersion   SchemaVersion @relation(fields: [schemaVersionId], references: [id], onDelete: Cascade)
+
+  @@unique([schemaVersionId, term])
+  @@index([schemaVersionId])
+}
+
+model Chat {
+  id              String   @id @default(uuid())
+  projectId       String
+  schemaVersionId String
+  title           String
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  lastMessageAt   DateTime?
+
+  project         Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  schemaVersion   SchemaVersion @relation(fields: [schemaVersionId], references: [id], onDelete: Cascade)
+  messages        Message[]
+  chatState       ChatState?
+
+  @@index([projectId])
+  @@index([schemaVersionId])
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@index([lastMessageAt])
+}
+
+model ChatState {
+  id            String   @id @default(uuid())
+  chatId        String   @unique
+  currentSQL    String?
+  currentIntent String?
+
+  updatedAt     DateTime @updatedAt
+
+  chat          Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+}
+
+model Message {
+  id        String      @id @default(uuid())
+  chatId    String
+  role      MessageRole
+  content   String
+  metadata  Json?
+
+  createdAt DateTime    @default(now())
+
+  chat      Chat        @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  @@index([chatId])
+  @@index([createdAt])
+}
