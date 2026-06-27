@@ -1,54 +1,38 @@
 import React from 'react';
 import { Textarea } from '@/components/ui/Textarea';
 import { Button } from '@/components/ui/Button';
-import { Send } from 'lucide-react';
+import { Send, Sparkles } from 'lucide-react';
 
 export const ChatPage: React.FC = () => {
   return (
     <div className="flex flex-col h-full relative max-w-4xl mx-auto w-full">
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-6 pb-32">
-        {/* Placeholder Messages */}
-        <div className="flex items-start gap-4">
-          <div className="w-8 h-8 rounded-full bg-surface shrink-0 flex items-center justify-center text-sm font-bold">U</div>
-          <div className="flex-1 pt-1">
-            <p className="text-text">Write a query to get the top 5 highest paying customers.</p>
-          </div>
+      {/* Empty State / Initial Prompt */}
+      <div className="flex-1 flex flex-col items-center justify-center p-4 space-y-6 pb-32">
+        <div className="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-4">
+          <Sparkles className="w-8 h-8" />
         </div>
-        
-        <div className="flex items-start gap-4">
-          <div className="w-8 h-8 rounded-full bg-primary shrink-0 flex items-center justify-center text-sm font-bold text-white">AI</div>
-          <div className="flex-1 pt-1 space-y-4">
-            <p className="text-text">Here is the query you requested based on your schema:</p>
-            <div className="bg-surface border border-border rounded-md p-4 overflow-x-auto">
-              <pre className="text-sm font-mono text-text">
-{`SELECT 
-  c.id, c.name, SUM(o.total_amount) as total_spent
-FROM customers c
-JOIN orders o ON c.id = o.customer_id
-GROUP BY c.id, c.name
-ORDER BY total_spent DESC
-LIMIT 5;`}
-              </pre>
-            </div>
-          </div>
-        </div>
+        <h2 className="text-2xl font-bold text-text text-center">How can I help you today?</h2>
+        <p className="text-muted text-center max-w-md">
+          Describe the SQL query you need, or ask me to explain and optimize an existing query.
+        </p>
       </div>
 
       {/* Input Area */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background via-background to-transparent">
-        <div className="relative max-w-3xl mx-auto">
+      <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-background via-background to-transparent">
+        <div className="relative max-w-3xl mx-auto bg-surface rounded-2xl border border-border shadow-sm overflow-hidden focus-within:ring-2 focus-within:ring-primary/20 transition-all">
           <Textarea 
-            placeholder="Describe the query you want to generate..." 
-            className="pr-12 resize-none shadow-sm rounded-xl py-3 min-h-[60px]"
+            placeholder="E.g., Write a query to get the top 5 highest paying customers..." 
+            className="border-0 focus-visible:ring-0 pr-14 resize-none min-h-[60px] bg-transparent py-4 text-base"
             rows={2}
           />
-          <Button size="sm" className="absolute right-2 bottom-2 h-8 w-8 p-0 rounded-lg">
-            <Send className="w-4 h-4" />
-          </Button>
+          <div className="absolute right-3 bottom-3 flex items-center">
+            <Button size="sm" className="h-9 w-9 p-0 rounded-full shadow-sm bg-primary text-white hover:bg-primary/90">
+              <Send className="w-4 h-4 ml-0.5" />
+            </Button>
+          </div>
         </div>
-        <div className="text-center mt-2 text-xs text-muted">
-          AI can make mistakes. Verify important queries.
+        <div className="text-center mt-3 text-xs text-muted">
+          AI can make mistakes. Always verify important queries against your production schema.
         </div>
       </div>
     </div>

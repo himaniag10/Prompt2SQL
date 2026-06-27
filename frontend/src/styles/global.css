@@ -4,33 +4,35 @@
 
 @layer base {
   :root {
-    --background: #ffffff;
-    --surface: #f9fafb;
-    --primary: #2563eb;
-    --secondary: #64748b;
-    --border: #e2e8f0;
-    --text: #0f172a;
-    --muted: #94a3b8;
-    --success: #22c55e;
-    --warning: #f59e0b;
-    --error: #ef4444;
+    --background: #fcfbf9; /* Soft Cream */
+    --surface: #faf9f6; /* Ivory */
+    --primary: #5c0f1c; /* Deep Maroon */
+    --secondary: #8a2b3b; /* Warm Burgundy */
+    --accent: #c19b6c; /* Muted Gold */
+    --border: #e6dfd5; /* Warm Beige */
+    --text: #2d2d2d; /* Dark Charcoal */
+    --muted: #8c857d;
+    --success: #2e7d32;
+    --warning: #ed6c02;
+    --error: #d32f2f;
   }
 
   .dark {
-    --background: #09090b;
-    --surface: #18181b;
-    --primary: #3b82f6;
-    --secondary: #71717a;
-    --border: #27272a;
-    --text: #fafafa;
-    --muted: #a1a1aa;
-    --success: #22c55e;
-    --warning: #f59e0b;
-    --error: #ef4444;
+    /* For now, keep the dark theme soft and complimentary, or just mirror a deeper warm tone */
+    --background: #1c1816;
+    --surface: #26211e;
+    --primary: #8a2b3b; /* Warm Burgundy */
+    --secondary: #c19b6c; /* Muted Gold */
+    --accent: #d4b58e;
+    --border: #3d3530;
+    --text: #e6dfd5;
+    --muted: #a39c94;
+    --success: #4caf50;
+    --warning: #ff9800;
+    --error: #f44336;
   }
 
   html {
-    @apply dark; /* Dark theme as default */
     background-color: var(--background);
     color: var(--text);
   }

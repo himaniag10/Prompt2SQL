@@ -7,37 +7,29 @@ export const ChatLayout: React.FC = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden text-text">
+    <div className="flex h-screen bg-background overflow-hidden text-text selection:bg-primary/20">
       {/* Sidebar - Chat History */}
       <AnimatePresence initial={false}>
         {isSidebarOpen && (
           <motion.aside
             initial={{ width: 0, opacity: 0 }}
-            animate={{ width: 260, opacity: 1 }}
+            animate={{ width: 280, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
-            className="h-full border-r border-border bg-surface flex flex-col"
+            className="h-full border-r border-border bg-surface flex flex-col shadow-sm"
           >
             <div className="p-4 border-b border-border flex items-center justify-between">
-              <Link to="/dashboard" className="text-muted hover:text-text transition-colors" title="Back to Dashboard">
+              <Link to="/dashboard" className="p-2 rounded-lg text-muted hover:bg-border/50 hover:text-text transition-colors" title="Back to Dashboard">
                 <ArrowLeft className="w-5 h-5" />
               </Link>
-              <button className="flex items-center gap-2 px-3 py-2 bg-primary/10 text-primary rounded-md hover:bg-primary/20 transition-colors text-sm font-medium">
+              <button className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-full hover:bg-primary/90 transition-colors text-sm font-medium shadow-sm">
                 <Plus className="w-4 h-4" />
                 New Chat
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto p-3 space-y-1">
-              <div className="text-xs font-semibold text-muted px-2 py-1 mb-2">Today</div>
-              {/* Placeholder History Items */}
-              {[1, 2, 3].map((i) => (
-                <button
-                  key={i}
-                  className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-border text-sm text-left truncate transition-colors"
-                >
-                  <MessageSquare className="w-4 h-4 text-muted shrink-0" />
-                  <span className="truncate">Explain SQL JOINs...</span>
-                </button>
-              ))}
+            <div className="flex-1 overflow-y-auto p-4 flex flex-col items-center justify-center text-center">
+              <MessageSquare className="w-8 h-8 text-border mb-3" />
+              <p className="text-sm font-medium text-text">No recent chats</p>
+              <p className="text-xs text-muted mt-1 max-w-[200px]">Start a new conversation to generate SQL queries.</p>
             </div>
           </motion.aside>
         )}
@@ -45,17 +37,17 @@ export const ChatLayout: React.FC = () => {
 
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-14 flex items-center px-4 border-b border-border bg-background">
+        <header className="h-16 flex items-center px-6 border-b border-border bg-background/50 backdrop-blur-md">
           <button
             onClick={() => setSidebarOpen(!isSidebarOpen)}
-            className="p-2 -ml-2 rounded-md hover:bg-surface text-muted transition-colors"
+            className="p-2 -ml-2 rounded-lg hover:bg-surface text-muted transition-colors"
           >
             {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
-          <div className="flex-1 text-center font-medium text-sm text-muted">Prompt2SQL Model</div>
+          <div className="flex-1 text-center font-medium text-sm text-text/80 tracking-wide uppercase">Prompt2SQL Workspace</div>
           <div className="w-9" /> {/* spacer to center title */}
         </header>
-        <main className="flex-1 overflow-auto relative">
+        <main className="flex-1 overflow-auto relative bg-background">
           <Outlet />
         </main>
       </div>

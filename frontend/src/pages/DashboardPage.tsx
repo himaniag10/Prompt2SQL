@@ -1,39 +1,28 @@
 import React from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
+import { EmptyState } from '@/components/common/EmptyState';
+import { Button } from '@/components/ui/Button';
+import { Plus, Database } from 'lucide-react';
 
 export const DashboardPage: React.FC = () => {
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Overview</h1>
-        <p className="text-muted">Welcome back! Here's what's happening with your schemas.</p>
+    <div className="h-full flex flex-col">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold tracking-tight text-text">Overview</h1>
+        <p className="text-muted mt-1">Manage your database projects and connections.</p>
       </div>
       
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle>Total Projects</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">12</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Generated Queries</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">1,482</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Active Schemas</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">4</div>
-          </CardContent>
-        </Card>
+      <div className="flex-1 flex items-center justify-center border border-dashed border-border/60 rounded-2xl bg-surface/50">
+        <EmptyState
+          icon={<Database className="h-10 w-10 text-primary/60" />}
+          title="No projects yet"
+          description="Create your first project to start designing schemas and generating queries."
+          action={
+            <Button size="md" className="gap-2 rounded-full px-6">
+              <Plus className="w-4 h-4" />
+              Create Project
+            </Button>
+          }
+        />
       </div>
     </div>
   );
