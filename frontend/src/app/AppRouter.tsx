@@ -16,6 +16,7 @@ import { DashboardPage } from '@/pages/DashboardPage';
 import { ProjectsPage } from '@/pages/ProjectsPage';
 import { SchemaBuilderPage } from '@/pages/SchemaBuilderPage';
 import { ChatPage } from '@/pages/ChatPage';
+import { GlobalChatPage } from '@/pages/GlobalChatPage';
 import { SettingsPage } from '@/pages/SettingsPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 
@@ -48,16 +49,20 @@ export const AppRouter: React.FC = () => {
               <Route path="/projects" element={<ProjectsPage />} />
               <Route path="/schema" element={<SchemaBuilderPage />} />
               <Route path="/projects/:projectId" element={<SchemaBuilderPage />} />
+              <Route path="/chat" element={<GlobalChatPage />} />
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
 
             {/* Chat Specific Layout */}
-            <Route element={
-              <ChatProvider>
-                <ChatLayout />
-              </ChatProvider>
-            }>
-              <Route path="/chat" element={<ChatPage />} />
+            <Route 
+              path="/projects/:projectId/schemas/:schemaId/chat" 
+              element={
+                <ChatProvider>
+                  <ChatLayout />
+                </ChatProvider>
+              }
+            >
+              <Route index element={<ChatPage />} />
             </Route>
           </Route>
 

@@ -59,7 +59,7 @@ export class ChatController {
         
         if (resolution.type !== 'resolved') return res.status(500).json({ error: 'Unexpected error.' });
 
-        const newTitle = content.length > 30 ? content.substring(0, 30) + '...' : content;
+        const newTitle = 'New Conversation'; // Will be updated asynchronously
         chat = await chatService.createChat(resolution.projectId, resolution.schemaVersionId, newTitle);
         chatId = chat.id;
         // Make chat structure similar to fetched chat
@@ -87,42 +87,61 @@ export class ChatController {
         businessGlossary
       );
 
-      // 4. Call AI Pipeline (Generate SQL -> Optimize & Explain)
-      const formattedHistory = chat.messages.map((m: any) => ({ role: m.role, content: m.content }));
-      const aiResponse = await aiOrchestratorService.generateSqlAndExplanation(contextString, content, formattedHistory);
+      // Prepare headers for SSE
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
 
-      // 5. Combine and format the AI's response
-      let finalAiMessageContent = '';
-      if (aiResponse.originalSql && aiResponse.optimizedSql && aiResponse.originalSql !== aiResponse.optimizedSql) {
-        finalAiMessageContent += `**Original SQL**\n\`\`\`sql\n${aiResponse.originalSql}\n\`\`\`\n\n`;
-        finalAiMessageContent += `**Optimized SQL**\n\`\`\`sql\n${aiResponse.optimizedSql}\n\`\`\`\n\n`;
-      } else if (aiResponse.optimizedSql) {
-        finalAiMessageContent += `\`\`\`sql\n${aiResponse.optimizedSql}\n\`\`\`\n\n`;
-      } else if (aiResponse.sql && aiResponse.sql.length > 0) {
-        finalAiMessageContent += `\`\`\`sql\n${aiResponse.sql}\n\`\`\`\n\n`;
-      }
-      finalAiMessageContent += aiResponse.explanation;
-
-      // 6. Save AI Message
-      const aiMessage = await chatService.addMessage(chatId, MessageRole.ASSISTANT, finalAiMessageContent);
-
-      return res.status(200).json({
-        type: 'success',
+      // Send initial context and chat ID
+      res.write(`data: ${JSON.stringify({ 
+        type: 'init', 
         chatId: chat.id,
-        message: aiMessage,
         context: {
           tables: tables?.map((t: any) => t.name) || [],
           relationships: relationships?.map((r: any) => `${r.fromTable}->${r.toTable}`) || []
         }
-      });
+      })}\n\n`);
+
+      // 4. Call AI Pipeline (Generate SQL -> Optimize & Explain) via Stream
+      const formattedHistory = chat.messages.map((m: any) => ({ role: m.role, content: m.content }));
+      
+      const aiResponse = await aiOrchestratorService.generateSqlAndExplanationStream(
+        contextString, 
+        content, 
+        formattedHistory,
+        (chunk) => {
+          res.write(`data: ${JSON.stringify({ type: 'chunk', content: chunk })}\n\n`);
+        }
+      );
+
+      // 5. Save AI Message
+      const aiMessage = await chatService.addMessage(chatId, MessageRole.ASSISTANT, aiResponse.fullContent);
+
+      // 6. Send done event
+      res.write(`data: ${JSON.stringify({ type: 'done', message: aiMessage })}\n\n`);
+      res.end();
+
+      // 7. If this was a new chat, generate a smart title asynchronously
+      if (!reqChatId && chat.messages.length === 0) {
+        aiOrchestratorService.generateChatTitle(content, aiResponse.fullContent)
+          .then(async (newTitle) => {
+            await chatService.renameChat(chatId, userId, newTitle);
+          })
+          .catch(e => console.error('Error generating smart title:', e));
+      }
 
     } catch (error: any) {
       console.error('Chat Error:', error);
-      if (error.message.includes('403')) return res.status(403).json({ error: error.message });
-      if (error.message.includes('No projects found') || error.message.includes('No schemas found') || error.message.includes('No schema versions found')) {
-        return res.status(400).json({ error: error.message });
+      if (!res.headersSent) {
+        if (error.message.includes('403')) return res.status(403).json({ error: error.message });
+        if (error.message.includes('No projects found') || error.message.includes('No schemas found') || error.message.includes('No schema versions found')) {
+          return res.status(400).json({ error: error.message });
+        }
+        return res.status(500).json({ error: 'Failed to process chat message.' });
+      } else {
+        res.write(`data: ${JSON.stringify({ type: 'error', error: 'Failed to process chat message.' })}\n\n`);
+        res.end();
       }
-      return res.status(500).json({ error: 'Failed to process chat message.' });
     }
   }
 
@@ -135,6 +154,22 @@ export class ChatController {
 
     try {
       const chat = await chatService.renameChat(req.params.id, userId, title);
+      return res.status(200).json(chat);
+    } catch (error: any) {
+      if (error.message.includes('403')) return res.status(403).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
+    }
+  }
+
+  async pinChat(req: AuthRequest, res: Response) {
+    const userId = req.user?.userId;
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const { isPinned } = req.body;
+    if (typeof isPinned !== 'boolean') return res.status(400).json({ error: 'isPinned boolean is required' });
+
+    try {
+      const chat = await chatService.pinChat(req.params.id, userId, isPinned);
       return res.status(200).json(chat);
     } catch (error: any) {
       if (error.message.includes('403')) return res.status(403).json({ error: error.message });

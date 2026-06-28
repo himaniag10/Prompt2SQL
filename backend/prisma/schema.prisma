@@ -214,6 +214,7 @@ model Chat {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   lastMessageAt   DateTime?
+  isPinned        Boolean  @default(false)
 
   project         Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
   schemaVersion   SchemaVersion @relation(fields: [schemaVersionId], references: [id], onDelete: Cascade)

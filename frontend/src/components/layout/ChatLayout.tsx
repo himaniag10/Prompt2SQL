@@ -12,7 +12,7 @@ export const ChatLayout: React.FC = () => {
   const [editingChatId, setEditingChatId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
-  const { chats, activeChat, activeChatId, selectChat, startNewChat, renameChat, deleteChat, chatContextData, projectId, setProjectId, schemaId, setSchemaId } = useChat();
+  const { chats, activeChat, activeChatId, selectChat, startNewChat, renameChat, pinChat, deleteChat, chatContextData, projectId, schemaId } = useChat();
 
   const { data: projects } = useQuery({
     queryKey: ['projects'],
@@ -33,6 +33,134 @@ export const ChatLayout: React.FC = () => {
     setMenuOpenId(null);
   };
 
+  const activeProject = projects?.find(p => p.id === projectId);
+  const activeSchema = schemas?.find(s => s.id === schemaId);
+
+  const getGroupedChats = () => {
+    const pinned: typeof chats = [];
+    const today: typeof chats = [];
+    const yesterday: typeof chats = [];
+    const last7Days: typeof chats = [];
+    const older: typeof chats = [];
+
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    chats.forEach(chat => {
+      if (chat.isPinned) {
+        pinned.push(chat);
+        return;
+      }
+      
+      if (!chat.updatedAt) {
+        older.push(chat);
+        return;
+      }
+      const chatDate = new Date(chat.updatedAt);
+      chatDate.setHours(0, 0, 0, 0);
+      const diffTime = Math.abs(now.getTime() - chatDate.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays === 0) today.push(chat);
+      else if (diffDays === 1) yesterday.push(chat);
+      else if (diffDays <= 7) last7Days.push(chat);
+      else older.push(chat);
+    });
+
+    return { pinned, today, yesterday, last7Days, older };
+  };
+
+  const groupedChats = getGroupedChats();
+
+  const renderChatGroup = (title: string, groupChats: typeof chats) => {
+    if (groupChats.length === 0) return null;
+    return (
+      <div className="mb-4">
+        <h4 className="px-3 text-[10px] font-bold uppercase tracking-wider text-muted mb-1">{title}</h4>
+        <div className="space-y-1">
+          {groupChats.map(renderChatItem)}
+        </div>
+      </div>
+    );
+  };
+
+  const renderChatItem = (chat: any) => (
+    <div key={chat.id} className="relative group mx-2">
+      {editingChatId === chat.id ? (
+        <div className="flex items-center px-2 py-1 bg-surface-hover rounded-lg">
+          <input
+            autoFocus
+            value={editTitle}
+            onChange={(e) => setEditTitle(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleRenameSubmit(chat.id);
+              if (e.key === 'Escape') setEditingChatId(null);
+            }}
+            onBlur={() => handleRenameSubmit(chat.id)}
+            className="flex-1 bg-transparent text-sm text-text outline-none border-none py-1.5"
+          />
+        </div>
+      ) : (
+        <div className={`flex items-center justify-between rounded-lg transition-colors ${
+          activeChatId === chat.id ? 'bg-primary/10' : 'hover:bg-surface-hover'
+        }`}>
+          <button
+            onClick={() => selectChat(chat.id)}
+            className={`flex-1 text-left p-2.5 text-sm truncate ${
+              activeChatId === chat.id ? 'text-primary font-medium' : 'text-text'
+            }`}
+          >
+            {chat.title || 'New Conversation'}
+          </button>
+          
+          <div className="relative pr-2">
+            <button 
+              onClick={() => setMenuOpenId(menuOpenId === chat.id ? null : chat.id)}
+              className={`p-1.5 rounded text-muted hover:text-text hover:bg-border/50 ${
+                menuOpenId === chat.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+              } transition-opacity`}
+            >
+              <MoreVertical className="w-4 h-4" />
+            </button>
+            
+            {menuOpenId === chat.id && (
+              <div className="absolute right-0 top-full mt-1 w-36 bg-surface border border-border rounded-md shadow-lg py-1 z-50">
+                <button
+                  onClick={() => {
+                    pinChat(chat.id, !chat.isPinned);
+                    setMenuOpenId(null);
+                  }}
+                  className="w-full text-left px-3 py-1.5 text-xs text-text hover:bg-surface-hover flex items-center gap-2"
+                >
+                  <span className="w-3 h-3 flex items-center justify-center">📌</span> {chat.isPinned ? 'Unpin' : 'Pin'}
+                </button>
+                <button
+                  onClick={() => {
+                    setEditTitle(chat.title || '');
+                    setEditingChatId(chat.id);
+                    setMenuOpenId(null);
+                  }}
+                  className="w-full text-left px-3 py-1.5 text-xs text-text hover:bg-surface-hover flex items-center gap-2"
+                >
+                  <Edit2 className="w-3 h-3" /> Rename
+                </button>
+                <button
+                  onClick={() => {
+                    deleteChat(chat.id);
+                    setMenuOpenId(null);
+                  }}
+                  className="w-full text-left px-3 py-1.5 text-xs text-red-500 hover:bg-surface-hover flex items-center gap-2"
+                >
+                  <Trash2 className="w-3 h-3" /> Delete
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="flex h-screen bg-background overflow-hidden text-text selection:bg-primary/20">
       {/* Sidebar - Chat History */}
@@ -45,7 +173,7 @@ export const ChatLayout: React.FC = () => {
             className="h-full border-r border-border bg-surface flex flex-col shadow-sm"
           >
             <div className="p-4 border-b border-border flex items-center justify-between">
-              <Link to="/dashboard" className="p-2 rounded-lg text-muted hover:bg-border/50 hover:text-text transition-colors" title="Back to Dashboard">
+              <Link to={`/projects/${projectId}`} className="p-2 rounded-lg text-muted hover:bg-border/50 hover:text-text transition-colors" title="Back to Schema">
                 <ArrowLeft className="w-5 h-5" />
               </Link>
               <button 
@@ -65,73 +193,13 @@ export const ChatLayout: React.FC = () => {
                   <p className="text-xs text-muted mt-1 max-w-[200px]">Start a new conversation to generate SQL queries.</p>
                 </div>
               ) : (
-                chats.map(chat => (
-                  <div key={chat.id} className="relative group">
-                    {editingChatId === chat.id ? (
-                      <div className="flex items-center px-2 py-1 bg-surface-hover rounded-lg">
-                        <input
-                          autoFocus
-                          value={editTitle}
-                          onChange={(e) => setEditTitle(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') handleRenameSubmit(chat.id);
-                            if (e.key === 'Escape') setEditingChatId(null);
-                          }}
-                          onBlur={() => handleRenameSubmit(chat.id)}
-                          className="flex-1 bg-transparent text-sm text-text outline-none border-none py-1.5"
-                        />
-                      </div>
-                    ) : (
-                      <div className={`flex items-center justify-between rounded-lg transition-colors ${
-                        activeChatId === chat.id ? 'bg-primary/10' : 'hover:bg-surface-hover'
-                      }`}>
-                        <button
-                          onClick={() => selectChat(chat.id)}
-                          className={`flex-1 text-left p-3 text-sm truncate ${
-                            activeChatId === chat.id ? 'text-primary font-medium' : 'text-text'
-                          }`}
-                        >
-                          {chat.title || 'New Conversation'}
-                        </button>
-                        
-                        <div className="relative pr-2">
-                          <button 
-                            onClick={() => setMenuOpenId(menuOpenId === chat.id ? null : chat.id)}
-                            className={`p-1.5 rounded text-muted hover:text-text hover:bg-border/50 ${
-                              menuOpenId === chat.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-                            } transition-opacity`}
-                          >
-                            <MoreVertical className="w-4 h-4" />
-                          </button>
-                          
-                          {menuOpenId === chat.id && (
-                            <div className="absolute right-0 top-full mt-1 w-32 bg-surface border border-border rounded-md shadow-lg py-1 z-50">
-                              <button
-                                onClick={() => {
-                                  setEditTitle(chat.title || '');
-                                  setEditingChatId(chat.id);
-                                  setMenuOpenId(null);
-                                }}
-                                className="w-full text-left px-3 py-1.5 text-xs text-text hover:bg-surface-hover flex items-center gap-2"
-                              >
-                                <Edit2 className="w-3 h-3" /> Rename
-                              </button>
-                              <button
-                                onClick={() => {
-                                  deleteChat(chat.id);
-                                  setMenuOpenId(null);
-                                }}
-                                className="w-full text-left px-3 py-1.5 text-xs text-red-500 hover:bg-surface-hover flex items-center gap-2"
-                              >
-                                <Trash2 className="w-3 h-3" /> Delete
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))
+                <div className="py-2">
+                  {renderChatGroup('Pinned', groupedChats.pinned)}
+                  {renderChatGroup('Today', groupedChats.today)}
+                  {renderChatGroup('Yesterday', groupedChats.yesterday)}
+                  {renderChatGroup('Previous 7 Days', groupedChats.last7Days)}
+                  {renderChatGroup('Older', groupedChats.older)}
+                </div>
               )}
             </div>
           </motion.aside>
@@ -149,44 +217,20 @@ export const ChatLayout: React.FC = () => {
           </button>
           
           <div className="flex-1 flex items-center justify-center gap-4">
-            <span className="font-medium text-sm text-text/80 tracking-wide uppercase">Prompt2SQL Workspace</span>
-            
-            {!activeChatId ? (
-              <div className="flex items-center gap-2">
-                <select 
-                  className="bg-surface border border-border rounded text-sm px-2 py-1 text-text focus:outline-none focus:border-primary"
-                  value={projectId || ''}
-                  onChange={(e) => {
-                    setProjectId(e.target.value);
-                    setSchemaId(null);
-                  }}
-                >
-                  <option value="">Select Project</option>
-                  {projects?.map(p => (
-                    <option key={p.id} value={p.id}>{p.name}</option>
-                  ))}
-                </select>
-
-                <select 
-                  className="bg-surface border border-border rounded text-sm px-2 py-1 text-text focus:outline-none focus:border-primary"
-                  value={schemaId || ''}
-                  onChange={(e) => setSchemaId(e.target.value)}
-                  disabled={!projectId}
-                >
-                  <option value="">Select Schema</option>
-                  {schemas?.map(s => (
-                    <option key={s.id} value={s.id}>{s.name}</option>
-                  ))}
-                </select>
-              </div>
-            ) : (
-              activeChat?.projectId && (
-                <span className="px-2 py-0.5 rounded-full bg-border text-xs text-muted-foreground flex items-center gap-1">
-                  <Database className="w-3 h-3" />
-                  Context Active
-                </span>
-              )
-            )}
+            <div className="flex items-center gap-2 text-sm">
+              <Link to="/projects" className="text-muted hover:text-text transition-colors">Projects</Link>
+              <span className="text-muted">/</span>
+              <Link to={`/projects/${projectId}`} className="text-text font-medium hover:text-primary transition-colors">{activeProject?.name || 'Loading...'}</Link>
+              <span className="text-muted">/</span>
+              <span className="text-text font-medium">{activeSchema?.name || 'Loading...'}</span>
+              
+              {activeProject && (
+                <>
+                  <span className="mx-2 text-border">|</span>
+                  <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 border border-primary/20 rounded-full">{activeProject.databaseType}</span>
+                </>
+              )}
+            </div>
           </div>
           
           <button

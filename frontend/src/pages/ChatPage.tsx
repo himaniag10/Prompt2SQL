@@ -156,6 +156,9 @@ export const ChatPage: React.FC = () => {
                       {msg.content}
                     </ReactMarkdown>
                   )}
+                  <div className={`text-[10px] opacity-50 mt-2 ${msg.role === 'USER' ? 'text-right text-primary-foreground' : 'text-left'}`}>
+                    {new Date(msg.createdAt || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </div>
                 </div>
                 
                 {msg.role === 'USER' && (

@@ -76,6 +76,17 @@ export class ChatService {
   }
 
   /**
+   * Pins or unpins a chat.
+   */
+  async pinChat(chatId: string, userId: string, isPinned: boolean) {
+    await this.getChatByIdAndUser(chatId, userId);
+    return prisma.chat.update({
+      where: { id: chatId },
+      data: { isPinned }
+    });
+  }
+
+  /**
    * Deletes a chat.
    */
   async deleteChat(chatId: string, userId: string) {

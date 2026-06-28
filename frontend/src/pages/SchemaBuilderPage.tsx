@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { useParams, useOutletContext } from 'react-router-dom';
+import { useParams, useOutletContext, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { DatabaseZap, Plus, LayoutGrid, ChevronRight, Edit2 } from 'lucide-react';
+import { DatabaseZap, Plus, LayoutGrid, ChevronRight, Edit2, MessageSquare } from 'lucide-react';
 import { SchemaApiService } from '@/services/schema.service';
 import { motion, AnimatePresence } from 'framer-motion';
 import { clsx } from 'clsx';
@@ -18,6 +18,7 @@ import { EmptyState } from '@/components/common/EmptyState';
 
 export const SchemaBuilderPage: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
+  const navigate = useNavigate();
   const { activeSchemaId, setActiveSchemaId } = useOutletContext<{ activeSchemaId: string | null, setActiveSchemaId: (id: string | null) => void }>();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<'tables' | 'relationships' | 'glossary' | 'overview'>('tables');
@@ -115,6 +116,16 @@ export const SchemaBuilderPage: React.FC = () => {
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
+                    <Button 
+                      onClick={() => navigate(`/projects/${projectId}/schemas/${activeSchemaId}/chat`)} 
+                      className="group relative overflow-hidden gap-2 px-6 shadow-[0_0_15px_rgba(var(--primary),0.3)] bg-gradient-to-r from-primary to-[#7a2a3a] text-white hover:from-primary/90 hover:to-[#7a2a3a]/90 transition-all duration-300 rounded-full font-semibold border border-primary/20"
+                    >
+                      <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                      <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                        <MessageSquare className="w-3 h-3 text-white" />
+                      </div>
+                      AI Chat
+                    </Button>
                     <button className="p-2 text-muted hover:bg-border/50 rounded-lg transition-colors">
                       <div className="w-5 h-5 flex items-center justify-center">•••</div>
                     </button>

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import api from '../services/api';
 
 export interface ChatMessage {
@@ -14,6 +15,8 @@ export interface Chat {
   schemaVersionId: string;
   title: string;
   messages: ChatMessage[];
+  updatedAt?: string;
+  isPinned?: boolean;
 }
 
 interface ChatContextType {
@@ -21,15 +24,14 @@ interface ChatContextType {
   activeChat: Chat | null;
   isTyping: boolean;
   chats: Chat[];
-  projectId: string | null;
-  setProjectId: (id: string | null) => void;
-  schemaId: string | null;
-  setSchemaId: (id: string | null) => void;
+  projectId: string | undefined;
+  schemaId: string | undefined;
   loadChats: (projectId: string) => Promise<void>;
   selectChat: (chatId: string) => Promise<void>;
   sendMessage: (content: string, schemaId?: string) => Promise<void>;
   startNewChat: () => void;
   renameChat: (chatId: string, title: string) => Promise<void>;
+  pinChat: (chatId: string, isPinned: boolean) => Promise<void>;
   deleteChat: (chatId: string) => Promise<void>;
   chatContextData: { tables: string[], relationships: string[] } | null;
 }
@@ -41,8 +43,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [chats, setChats] = useState<Chat[]>([]);
-  const [projectId, setProjectId] = useState<string | null>(null);
-  const [schemaId, setSchemaId] = useState<string | null>(null);
+  const { projectId, schemaId } = useParams<{ projectId: string, schemaId: string }>();
   const [chatContextData, setChatContextData] = useState<{ tables: string[], relationships: string[] } | null>(null);
 
   useEffect(() => {
@@ -88,6 +89,18 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const pinChat = async (chatId: string, isPinned: boolean) => {
+    try {
+      await api.put(`/chat/${chatId}/pin`, { isPinned });
+      if (projectId) loadChats(projectId);
+      if (activeChatId === chatId) {
+        setActiveChat(prev => prev ? { ...prev, isPinned } : null);
+      }
+    } catch (error) {
+      console.error('Failed to pin chat:', error);
+    }
+  };
+
   const deleteChat = async (chatId: string) => {
     try {
       await api.delete(`/chat/${chatId}`);
@@ -123,26 +136,91 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const payload: any = { content };
       if (activeChatId) payload.chatId = activeChatId;
       if (projectId) payload.projectId = projectId;
-      if (paramSchemaId || schemaId) payload.schemaId = paramSchemaId || schemaId;
+      if (schemaId) payload.schemaId = schemaId;
 
-      const res = await api.post('/chat/message', payload);
-      
-      // Update with real chat if it was just created
-      if (!activeChatId && res.data.chatId) {
-        await selectChat(res.data.chatId);
-        loadChats(projectId!); // reload chat list
-      } else {
-        // Just append the assistant message
-        setActiveChat(prev => {
-          if (prev) {
-            return { ...prev, messages: [...prev.messages, res.data.message] };
-          }
-          return prev;
-        });
+      const token = localStorage.getItem('accessToken');
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+
+      const response = await fetch(`${baseUrl}/chat/message`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send message');
       }
-      
-      if (res.data.context) {
-        setChatContextData(res.data.context);
+
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error('No reader available');
+
+      const decoder = new TextDecoder('utf-8');
+      let buffer = '';
+      let isFirstChunk = true;
+      let assistantMessageId = Date.now().toString() + '-ai';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.trim() === '') continue;
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.substring(6));
+
+              if (data.type === 'init') {
+                if (!activeChatId && data.chatId) {
+                  // We need to fetch the real chat if it was just created to get title etc
+                  await selectChat(data.chatId);
+                  loadChats(projectId!); // refresh list
+                }
+                if (data.context) {
+                  setChatContextData(data.context);
+                }
+              } else if (data.type === 'chunk') {
+                if (isFirstChunk) {
+                  // Add the initial empty assistant message
+                  setActiveChat(prev => {
+                    if (!prev) return prev;
+                    return {
+                      ...prev,
+                      messages: [...prev.messages, {
+                        id: assistantMessageId,
+                        role: 'ASSISTANT',
+                        content: data.content,
+                        createdAt: new Date().toISOString()
+                      }]
+                    };
+                  });
+                  isFirstChunk = false;
+                } else {
+                  // Append to existing assistant message
+                  setActiveChat(prev => {
+                    if (!prev) return prev;
+                    const messages = [...prev.messages];
+                    const lastMsg = messages[messages.length - 1];
+                    if (lastMsg && lastMsg.role === 'ASSISTANT') {
+                      lastMsg.content += data.content;
+                    }
+                    return { ...prev, messages };
+                  });
+                }
+              } else if (data.type === 'done') {
+                // Finalize if needed
+              }
+            } catch (e) {
+              console.error('Error parsing SSE data', e);
+            }
+          }
+        }
       }
     } catch (error: any) {
       console.error('Failed to send message:', error);
@@ -161,14 +239,13 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isTyping, 
         chats, 
         projectId, 
-        setProjectId, 
         schemaId,
-        setSchemaId,
         loadChats, 
         selectChat, 
         sendMessage, 
         startNewChat,
         renameChat,
+        pinChat,
         deleteChat,
         chatContextData
       }}

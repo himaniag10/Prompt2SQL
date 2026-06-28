@@ -23,6 +23,15 @@ export class AiOrchestratorService {
     }
   }
 
+  private async generateStreamWithFallback(prompt: string, onChunk: (chunk: string) => void): Promise<string> {
+    try {
+      return await this.groqProvider.generateStream(prompt, onChunk);
+    } catch (error) {
+      console.warn('Groq stream failed, falling back to Gemini:', error);
+      return await this.geminiProvider.generateStream(prompt, onChunk);
+    }
+  }
+
   /**
    * Two-step pipeline:
    * 1. Generate SQL
@@ -55,6 +64,66 @@ export class AiOrchestratorService {
       optimizedSql: optimizedSql,
       explanation: explanation
     };
+  }
+
+  /**
+   * Generates response as a stream for real-time ChatGPT-like UX.
+   */
+  async generateSqlAndExplanationStream(
+    contextString: string,
+    question: string,
+    history: { role: string; content: string }[],
+    onChunk: (chunk: string) => void
+  ): Promise<{ sql: string; originalSql?: string; optimizedSql?: string; explanation: string; fullContent: string }> {
+    
+    // Step 1: Generate Raw SQL
+    const sqlGenerationPrompt = this.buildSqlGenerationPrompt(contextString, question, history);
+    const generatedRawSqlText = await this.generateWithFallback(sqlGenerationPrompt);
+    const rawSql = this.extractSql(generatedRawSqlText);
+
+    // If original SQL exists, stream it out before optimizing to show immediate progress
+    if (rawSql) {
+      const originalHeader = `**Original SQL**\n\`\`\`sql\n${rawSql}\n\`\`\`\n\n**Optimizing...**\n\n`;
+      onChunk(originalHeader);
+    }
+
+    // Step 2: Optimize and Explain (Streamed)
+    const optimizationPrompt = this.buildStreamOptimizationPrompt(contextString, question, rawSql);
+    const fullContent = await this.generateStreamWithFallback(optimizationPrompt, onChunk);
+
+    return {
+      sql: rawSql,
+      fullContent: fullContent,
+      originalSql: rawSql,
+      explanation: fullContent // Since the prompt merges it
+    };
+  }
+
+  /**
+   * Generates a short title for a chat based on the first message and AI response.
+   */
+  async generateChatTitle(question: string, aiResponse: string): Promise<string> {
+    const prompt = `
+You are an AI assistant.
+Your task is to generate a concise, human-readable title (maximum 4-5 words) for a conversation based on the user's first question and the AI's response.
+Do NOT use quotes in your response. Respond ONLY with the title.
+
+=== User Question ===
+${question}
+
+=== AI Response ===
+${aiResponse}
+`.trim();
+
+    try {
+      const generatedTitle = await this.generateWithFallback(prompt);
+      // Clean up the title (remove quotes, trim whitespace, ensure length limit)
+      const cleanTitle = generatedTitle.replace(/["']/g, '').trim().substring(0, 50);
+      return cleanTitle || 'New Conversation';
+    } catch (error) {
+      console.warn('Failed to generate chat title:', error);
+      return question.substring(0, 30) + '...';
+    }
   }
 
   private buildSqlGenerationPrompt(context: string, question: string, history: { role: string; content: string }[]): string {
@@ -99,6 +168,35 @@ Respond exactly in this format:
 <explanation>
 [Your plain English explanation here]
 </explanation>
+
+${context}
+
+=== User's Goal ===
+${question}
+
+=== Raw SQL ===
+\`\`\`sql
+${rawSql}
+\`\`\`
+`.trim();
+  }
+
+  private buildStreamOptimizationPrompt(context: string, question: string, rawSql: string): string {
+    return `
+You are an expert SQL Optimizer. 
+You are given a schema context, the user's goal, and a raw SQL query generated to solve that goal.
+
+Your task is to OPTIMIZE the SQL query and EXPLAIN it.
+Write your response in Markdown. Do NOT use any XML tags.
+
+Format your response exactly like this:
+**Optimized SQL**
+\`\`\`sql
+[Optimized SQL]
+\`\`\`
+
+**Explanation**
+[Plain English explanation]
 
 ${context}
 

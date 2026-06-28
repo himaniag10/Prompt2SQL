@@ -9,5 +9,6 @@ export const chatRoutes = Router();
 chatRoutes.get('/', protect, (req, res) => chatController.getProjectChats(req as AuthRequest, res));
 chatRoutes.get('/:id', protect, (req, res) => chatController.getChat(req as AuthRequest, res));
 chatRoutes.put('/:id', protect, (req, res) => chatController.renameChat(req as AuthRequest, res));
+chatRoutes.put('/:id/pin', protect, (req, res) => chatController.pinChat(req as AuthRequest, res));
 chatRoutes.delete('/:id', protect, (req, res) => chatController.deleteChat(req as AuthRequest, res));
 chatRoutes.post('/message', protect, (req, res) => chatController.sendMessage(req as AuthRequest, res));
