@@ -20,6 +20,7 @@ import { SettingsPage } from '@/pages/SettingsPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 
 import { AuthProvider } from '@/context/AuthContext';
+import { ChatProvider } from '@/context/ChatContext';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 
 export const AppRouter: React.FC = () => {
@@ -51,7 +52,11 @@ export const AppRouter: React.FC = () => {
             </Route>
 
             {/* Chat Specific Layout */}
-            <Route element={<ChatLayout />}>
+            <Route element={
+              <ChatProvider>
+                <ChatLayout />
+              </ChatProvider>
+            }>
               <Route path="/chat" element={<ChatPage />} />
             </Route>
           </Route>
