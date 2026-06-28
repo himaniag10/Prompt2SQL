@@ -6,6 +6,7 @@ import { tableRoutes } from './table.routes';
 import { columnRoutes } from './column.routes';
 import { relationshipRoutes } from './relationship.routes';
 import { glossaryRoutes } from './glossary.routes';
+import { aiRoutes } from './ai.routes';
 
 const router = Router();
 
@@ -22,5 +23,6 @@ router.use('/', tableRoutes);        // Mounts /api/schemas/:schemaId/tables and
 router.use('/', columnRoutes);       // Mounts /api/tables/:tableId/columns and /api/columns/:id
 router.use('/', relationshipRoutes); // Mounts /api/schemas/:schemaId/relationships and /api/relationships/:id
 router.use('/', glossaryRoutes);     // Mounts /api/schemas/:schemaId/glossary and /api/glossary/:id
+router.use('/ai', aiRoutes);
 
 export default router;
